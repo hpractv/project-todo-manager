@@ -29,6 +29,7 @@ Keep entries concise and non-obvious. Remove entries that are no longer relevant
 - `web/tsconfig.json` must override `lib` to add `"DOM", "DOM.Iterable"` on top of the root `tsconfig.base.json`'s `ES2022`-only lib list, or DOM globals (`document`, etc.) won't resolve.
 - When manually verifying `npm run dev -w web`, port 5173 may already be occupied by an unrelated Vite server from a different project on the same machine — Vite auto-falls-back to 5174 and logs it; check `lsof -i :5173` / process cwd before assuming it's a conflict worth fixing.
 
+- Task 3 (Redux store + typed hooks): `@reduxjs/toolkit@2.12.0` + `react-redux@9.3.0` ship a `.withTypes<T>()` helper on `useDispatch`/`useSelector`, so `web/src/store/hooks.ts` is just `export const useAppDispatch = useDispatch.withTypes<AppDispatch>();` / `useSelector.withTypes<RootState>()` — no need for the older `TypedUseSelectorHook` generic-wrapper pattern from RTK docs examples predating this API.
 - Repo started with zero commits on branch `init` (no `main` yet) — do not assume `git log`/`main` exist when bootstrapping.
 - Root `.gitignore` must cover `node_modules/`, `dist/`, `*.db`, `*.sqlite`, `*.sqlite3` before running `npm install`, otherwise workspace installs will pollute git status.
 - Placeholder `dev`/`build` scripts in `web/`/`api/` (before Vite/Express are scaffolded) use `echo "..."` so `npm run dev`/`npm run build` succeed end-to-end without erroring on missing scripts.
