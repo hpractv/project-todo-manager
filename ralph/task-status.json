@@ -121,10 +121,10 @@
       "id": 14,
       "title": "Add API integration tests for projects endpoints",
       "description": "**What/Why:** Epic todo `foundation-tests` requires integration tests for all 5 projects endpoints covering happy path, not-found, and validation errors.\n\n**Files:**\n- `api/package.json` (modify) - Add vitest + supertest + @types/supertest to devDependencies, add `\"test\": \"vitest run\"` script.\n- `api/vitest.config.ts` (new) - Configure Vitest for Node environment.\n- `api/src/routes/projects.test.ts` (new) - Integration tests using supertest against the Express app.\n\n**Test cases:**\n- POST /api/projects: success (201 + body with id/name/description/created_at), validation error for missing name (400 + `{\"error\": \"name is required\"}`).\n- GET /api/projects: returns array, each item has task_count field.\n- GET /api/projects/:id: success (200), not found (404 + `{\"error\": \"Project not found\"}`).\n- PUT /api/projects/:id: success (200), not found (404), validation error for missing name (400).\n- DELETE /api/projects/:id: success (204 empty body), not found (404).\n\n**Approach:**\n1. Install vitest + supertest + @types/supertest as devDependencies.\n2. Create vitest.config.ts targeting Node environment.\n3. Use separate test DB (`DB_PATH=./data/test.db` via env) to isolate tests.\n4. Export Express app from server.ts (already exported), use supertest's `request(app)` to make requests.\n5. Use beforeEach/afterAll hooks to reset DB state.\n\n**Tests to run:** `npm run test -w api` exits 0.\n\n**Acceptance:** All 5 endpoints have tests, happy path + error cases covered, `npm run test -w api` passes.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:44:50.274Z"
+      "updatedAt": "2026-08-27T17:54:26.296Z"
     },
     {
       "id": 15,
@@ -133,21 +133,21 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:44:50.274Z"
+      "updatedAt": "2026-08-27T17:49:16.310Z"
     }
   ],
-  "currentTaskNum": 13,
-  "totalLLMCalls": 39,
+  "currentTaskNum": 14,
+  "totalLLMCalls": 42,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 13,
-    "content": "## Task: Document install/run commands in README\n\n**What/Why:** The epic requires documenting install and run commands and verifying data persists across app restart (AC-027, epic todo `run-and-persist-docs`).\n\n**Files:**\n- `README.md` (new) - Project README with: project description, prerequisites (Node v20.x per memory.md), install command (`npm install`), dev command (`npm run dev` - runs both workspaces), build command (`npm run build`), individual workspace commands, where the SQLite DB is stored (`api/data/todo.db`), and a note that data persists across restarts.\n\n**Approach:**\n1. Create README.md at repo root with sections: Overview, Prerequisites, Quick Start, Development, Build, Database Location, Verification.\n2. Include API port (default 3001) and web port (default 5173).\n3. Add quick-start steps: 1) `npm install`, 2) `npm run dev`, 3) open http://localhost:5173.\n4. Document persistence: SQLite file at `api/data/todo.db`, data survives restart.\n5. Verify manually: start app, create project, stop servers, restart, confirm project exists.\n\n**Tests to run:** Follow README instructions on a fresh terminal - all commands work.\n\n**Acceptance:** README exists with all required commands, following documented steps results in a running app, data persists across restart (AC-027).",
-    "updatedAt": "2026-08-27T17:44:50.277Z"
+    "taskId": 14,
+    "content": "## Task: Add API integration tests for projects endpoints\n\n**What/Why:** Epic todo `foundation-tests` requires integration tests for all 5 projects endpoints covering happy path, not-found, and validation errors.\n\n**Files:**\n- `api/package.json` (modify) - Add vitest + supertest + @types/supertest to devDependencies, add `\"test\": \"vitest run\"` script.\n- `api/vitest.config.ts` (new) - Configure Vitest for Node environment.\n- `api/src/routes/projects.test.ts` (new) - Integration tests using supertest against the Express app.\n\n**Test cases:**\n- POST /api/projects: success (201 + body with id/name/description/created_at), validation error for missing name (400 + `{\"error\": \"name is required\"}`).\n- GET /api/projects: returns array, each item has task_count field.\n- GET /api/projects/:id: success (200), not found (404 + `{\"error\": \"Project not found\"}`).\n- PUT /api/projects/:id: success (200), not found (404), validation error for missing name (400).\n- DELETE /api/projects/:id: success (204 empty body), not found (404).\n\n**Approach:**\n1. Install vitest + supertest + @types/supertest as devDependencies.\n2. Create vitest.config.ts targeting Node environment.\n3. Use separate test DB (`DB_PATH=./data/test.db` via env) to isolate tests.\n4. Export Express app from server.ts (already exported), use supertest's `request(app)` to make requests.\n5. Use beforeEach/afterAll hooks to reset DB state.\n\n**Tests to run:** `npm run test -w api` exits 0.\n\n**Acceptance:** All 5 endpoints have tests, happy path + error cases covered, `npm run test -w api` passes.",
+    "updatedAt": "2026-08-27T17:49:16.313Z"
   },
   "feedback": {
-    "taskId": 13,
-    "content": "The README task passes QA — verified against the actual code:\n\n- **Prerequisites/commands**: `npm install`, `npm run dev`, `npm run build`, workspace-level commands all match the real `package.json` scripts (root, `api/`, `web/`).\n- **Ports**: API default 3001 (`api/src/index.ts`), web default 5173 (Vite) — both match what's documented.\n- **DB location**: `api/data/todo.db` matches `DB_PATH` default in `api/src/db/index.ts` resolved against the `api/` working directory.\n- **Ran the actual commands**: `npm run build` succeeds end-to-end (api tsc + web tsc/vite build); `npm run test` and `npm run lint` no-op cleanly via `--if-present` (expected — tasks 14/15 add real tests/lint later).\n- **AC-027 persistence**: independently verified at the API/DB layer — created a project, killed and restarted the compiled server against the same `DB_PATH`, confirmed the row survived the restart.\n- No stray artifacts left in git status; only the expected `README.md` (untracked) and `ralph/task-status.json` (ralph-loop-owned) changes.\n\nMinor non-blocking note: the README's section layout (Overview/Prerequisites/Quick Start/Development/Database Location/Verification) collapses the task brief's separate \"Build\" section into \"Development\" — content is all present, just organized slightly differently. Not a correctness issue.\n\nAppended QA notes for task 13 to `ralph/memory.md`.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-27T17:48:07.092Z"
+    "taskId": 14,
+    "content": "Everything checks out. All acceptance criteria are met:\n\n- `api/package.json`: vitest, supertest, `@types/supertest` added as devDependencies; `\"test\": \"vitest run\"` script added.\n- `api/vitest.config.ts`: Node environment configured, `DB_PATH` set to an isolated test DB via `test.env`.\n- `api/src/routes/projects.test.ts`: covers all 5 endpoints — POST (success, missing name, blank name), GET list (with `task_count`, empty case), GET by id (found/404), PUT (success/404/missing name), DELETE (success + verifies follow-up 404, plus not-found).\n- `npm run test -w api` passes: 13/13 tests green.\n- `npm run build -w api` still compiles cleanly.\n- No stray artifacts in git status; test DB file is cleaned up in `afterAll` and covered by `.gitignore` regardless.\n- Tests correctly assert the actual lowercase `\"project not found\"` error message from the existing route code rather than blindly matching the task prompt's illustrative capitalized example — a good adversarial catch, not a bug.\n\nFeedback (non-blocking): `tsc` also emits `dist/routes/projects.test.js` since `tsconfig.json`'s `include` has no test exclusion — harmless since `start` only runs `dist/index.js`, not worth blocking on.\n\n# Feedback\nNone blocking.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-27T17:54:26.295Z"
   },
-  "lastUpdated": "2026-08-27T17:48:07.093Z"
+  "lastUpdated": "2026-08-27T17:54:26.296Z"
 }
