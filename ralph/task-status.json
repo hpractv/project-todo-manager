@@ -103,10 +103,10 @@
       "id": 12,
       "title": "Add delete confirmation and wire UI to App",
       "description": "**What/Why:** The epic requires delete-with-confirmation and the UI components must be integrated into App.tsx for end-to-end functionality. This completes the projects UI slice.\n\n**Files:**\n- `web/src/features/projects/DeleteConfirmDialog.tsx` (new) - Modal/dialog that shows 'Are you sure you want to delete project X?' with Confirm and Cancel buttons. On confirm: dispatch `deleteProject(id)` and close. Uses native `<dialog>` element or a simple div overlay.\n- `web/src/App.tsx` (modify) - Import and render ProjectList, ProjectForm, and DeleteConfirmDialog. Add state for: `showForm: boolean`, `editingProject: Project | null`, `deletingProject: Project | null`. Render the form when showForm is true or editingProject is set. Render the dialog when deletingProject is set.\n- Update `web/src/features/projects/index.ts` to export DeleteConfirmDialog.\n\n**Approach:** Add buttons in ProjectList for Edit (opens form with project) and Delete (opens confirm dialog). Add a 'New Project' button that opens the empty form. Keep it minimal - no routing needed.\n\n**Cascade readiness:** `PRAGMA foreign_keys = ON` is already enabled in db/index.ts. The tasks table (next epic) will use `REFERENCES projects(id) ON DELETE CASCADE` to cascade deletes.\n\n**Tests to run:** `npm run build -w web`. Manual E2E: start both servers, create project, edit it, delete it with confirmation, verify persistence across reload.\n\n**Acceptance:** All CRUD operations work from UI, delete shows confirmation prompt, AC-001 through AC-006 pass manual verification.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T17:30:14.987Z"
+      "updatedAt": "2026-08-27T17:43:58.294Z"
     },
     {
       "id": 13,
@@ -115,7 +115,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:12:32.528Z",
-      "updatedAt": "2026-08-27T17:30:14.987Z"
+      "updatedAt": "2026-08-27T17:39:30.488Z"
     },
     {
       "id": 14,
@@ -124,7 +124,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:30:14.987Z"
+      "updatedAt": "2026-08-27T17:39:30.488Z"
     },
     {
       "id": 15,
@@ -133,21 +133,21 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:30:14.987Z"
+      "updatedAt": "2026-08-27T17:39:30.488Z"
     }
   ],
-  "currentTaskNum": 11,
-  "totalLLMCalls": 33,
+  "currentTaskNum": 12,
+  "totalLLMCalls": 36,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 11,
-    "content": "## Task: Build ProjectForm component for create and edit\n\n**What/Why:** The epic requires a create/edit form for projects. This component handles both modes: creating a new project or editing an existing one.\n\n**Files:**\n- `web/src/features/projects/ProjectForm.tsx` (new) - Form with `name` (required text input) and `description` (optional textarea). Props: `project?: Project` (if provided, edit mode; otherwise create mode), `onClose?: () => void`. On submit: dispatch `createProject` or `updateProject` thunk, then call onClose.\n- Update `web/src/features/projects/index.ts` to export ProjectForm.\n\n**Approach:** Use controlled inputs with useState. Validate name is non-empty before submit (match API's 400 behavior). Clear form after successful create. In edit mode, pre-populate fields from the project prop. Disable submit button while loading.\n\n**Tests to run:** `npm run build -w web`. Manual: render form in App, fill in name, submit - project appears in list; edit existing project - changes persist after reload.\n\n**Acceptance:** Form creates new projects and edits existing ones, validation prevents empty names, successful operations update the Redux store and persist to DB.",
-    "updatedAt": "2026-08-27T17:30:14.991Z"
+    "taskId": 12,
+    "content": "## Task: Add delete confirmation and wire UI to App\n\n**What/Why:** The epic requires delete-with-confirmation and the UI components must be integrated into App.tsx for end-to-end functionality. This completes the projects UI slice.\n\n**Files:**\n- `web/src/features/projects/DeleteConfirmDialog.tsx` (new) - Modal/dialog that shows 'Are you sure you want to delete project X?' with Confirm and Cancel buttons. On confirm: dispatch `deleteProject(id)` and close. Uses native `<dialog>` element or a simple div overlay.\n- `web/src/App.tsx` (modify) - Import and render ProjectList, ProjectForm, and DeleteConfirmDialog. Add state for: `showForm: boolean`, `editingProject: Project | null`, `deletingProject: Project | null`. Render the form when showForm is true or editingProject is set. Render the dialog when deletingProject is set.\n- Update `web/src/features/projects/index.ts` to export DeleteConfirmDialog.\n\n**Approach:** Add buttons in ProjectList for Edit (opens form with project) and Delete (opens confirm dialog). Add a 'New Project' button that opens the empty form. Keep it minimal - no routing needed.\n\n**Cascade readiness:** `PRAGMA foreign_keys = ON` is already enabled in db/index.ts. The tasks table (next epic) will use `REFERENCES projects(id) ON DELETE CASCADE` to cascade deletes.\n\n**Tests to run:** `npm run build -w web`. Manual E2E: start both servers, create project, edit it, delete it with confirmation, verify persistence across reload.\n\n**Acceptance:** All CRUD operations work from UI, delete shows confirmation prompt, AC-001 through AC-006 pass manual verification.",
+    "updatedAt": "2026-08-27T17:39:30.492Z"
   },
   "feedback": {
-    "taskId": 11,
-    "content": "<status>verified</status>\n",
-    "updatedAt": "2026-08-27T17:38:16.909Z"
+    "taskId": 12,
+    "content": "# QA Result\n\nReviewed the diff for task 12 (delete confirmation dialog + App.tsx wiring) against the epic requirements and acceptance criteria.\n\n**Checks performed:**\n- Code review of `DeleteConfirmDialog.tsx`, `App.tsx`, `ProjectList.tsx`, `index.ts` diffs, plus `ProjectForm.tsx`, `projectsSlice.ts`, and `api/types.ts` for consistency.\n- `npm run build -w web` — passes with no type errors.\n- Independent E2E re-verification (not reusing the dev pass's claims): fresh API instance on an isolated port with an empty throwaway DB, fresh Vite dev server, headless Chrome + puppeteer-core driving real clicks. 20 assertions covering create → edit/rename → delete-with-cancel (no-op) → delete-with-confirm → page reload, all passed, including that the deleted project stays gone after reload (confirms the DELETE hit the real DB, not just Redux state).\n- Cleaned up all temp processes/files afterward; `git status` confirms no leftover artifacts.\n\n**Findings:** none. The implementation matches the task spec exactly (files, props, dialog role attributes, cascade-readiness note), reuses established patterns from tasks 10/11 (remount-via-`key`, try/catch around `.unwrap()`), and all acceptance criteria (AC-001–AC-006) verified manually.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-27T17:43:58.293Z"
   },
-  "lastUpdated": "2026-08-27T17:38:16.912Z"
+  "lastUpdated": "2026-08-27T17:43:58.294Z"
 }

@@ -8,8 +8,14 @@ import {
   selectProjectsLoading,
   selectSelectedProject,
 } from '../../store/projectsSlice';
+import type { ProjectWithTaskCount } from '../../api/types';
 
-function ProjectList() {
+interface ProjectListProps {
+  onEdit: (project: ProjectWithTaskCount) => void;
+  onDelete: (project: ProjectWithTaskCount) => void;
+}
+
+function ProjectList({ onEdit, onDelete }: ProjectListProps) {
   const dispatch = useAppDispatch();
   const projects = useAppSelector(selectAllProjects);
   const selectedProject = useAppSelector(selectSelectedProject);
@@ -48,6 +54,12 @@ function ProjectList() {
               }}
             >
               {project.name} ({project.task_count})
+            </button>
+            <button type="button" onClick={() => onEdit(project)}>
+              Edit
+            </button>
+            <button type="button" onClick={() => onDelete(project)}>
+              Delete
             </button>
           </li>
         );
