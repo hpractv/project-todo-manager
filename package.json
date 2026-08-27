@@ -1,0 +1,19 @@
+{
+  "name": "project-todo-manager",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "web",
+    "api"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w api\" \"npm run dev -w web\"",
+    "build": "npm run build -w api && npm run build -w web",
+    "test": "npm run test -w api --if-present && npm run test -w web --if-present",
+    "lint": "npm run lint -w api --if-present && npm run lint -w web --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

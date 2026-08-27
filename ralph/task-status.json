@@ -1,0 +1,144 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Initialize monorepo with web/ and api/ workspaces",
+      "description": "Create the two-workspace monorepo structure with root orchestration scripts.\n\n**What/Why:** The epic requires a `web/` (Vite React+TS) workspace and an `api/` (Express+TS) workspace. Root scripts coordinate install and run for both.\n\n**Files:**\n- `package.json` (root) — workspaces config, scripts: `install`, `dev`, `build`\n- `web/package.json` — placeholder, name `@project-todo-manager/web`\n- `api/package.json` — placeholder, name `@project-todo-manager/api`\n- `.gitignore` — node_modules, dist, *.db files\n- `tsconfig.base.json` — shared TS config for both workspaces to extend\n\n**Approach:**\n1. Create root `package.json` with `\"workspaces\": [\"web\", \"api\"]`\n2. Add scripts: `\"dev\": \"concurrently \\\"npm run dev -w api\\\" \\\"npm run dev -w web\\\"\"` etc.\n3. Create `web/package.json` and `api/package.json` with placeholder scripts\n4. Create shared `tsconfig.base.json` with strict mode, ES2022 target\n5. Add `.gitignore` for node_modules, dist, *.sqlite, *.db\n\n**Tests:** Run `npm install` at root — should succeed without errors.\n\n**Acceptance:** `ls web api` shows both directories; `cat package.json` shows workspaces array; `npm install` completes.",
+      "status": "done",
+      "devIterations": 1,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:39:57.927Z"
+    },
+    {
+      "id": 2,
+      "title": "Scaffold Vite React+TS app in web/",
+      "description": "Set up the Vite React+TypeScript application in the web/ workspace.\n\n**What/Why:** REQ-027 requires React+TypeScript with Vite. This creates the runnable front-end shell.\n\n**Files:**\n- `web/package.json` — add vite, react, react-dom, typescript, @types/react, @types/react-dom\n- `web/vite.config.ts` — configure React plugin, dev server port (5173), proxy /api to api server\n- `web/tsconfig.json` — extends base, includes src/**/*\n- `web/index.html` — entry HTML with root div\n- `web/src/main.tsx` — React root render\n- `web/src/App.tsx` — placeholder App component\n- `web/src/vite-env.d.ts` — Vite types\n\n**Approach:**\n1. Add dependencies: vite, @vitejs/plugin-react, react, react-dom, typescript, @types/*\n2. Create vite.config.ts with react() plugin and proxy config `{ '/api': { target: 'http://localhost:3001' } }`\n3. Create index.html, main.tsx, App.tsx with minimal \"Project Todo Manager\" heading\n4. Add scripts: `\"dev\": \"vite\"`, `\"build\": \"vite build\"`, `\"preview\": \"vite preview\"`\n\n**Tests:** Run `npm run dev -w web` — opens at localhost:5173 and shows heading.\n\n**Acceptance:** `npm run dev -w web` starts successfully; browser shows React app at http://localhost:5173.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 3,
+      "title": "Configure Redux store with typed hooks in web/",
+      "description": "Set up Redux Toolkit with typed root state and typed dispatch/selector hooks.\n\n**What/Why:** REQ-027 requires Redux for state management. Typed hooks prevent type errors throughout the app.\n\n**Files:**\n- `web/src/store/index.ts` — configureStore, export store, RootState, AppDispatch types\n- `web/src/store/hooks.ts` — useAppDispatch, useAppSelector typed hooks\n- `web/src/main.tsx` — wrap App with Provider\n- `web/package.json` — add @reduxjs/toolkit, react-redux\n\n**Approach:**\n1. Install @reduxjs/toolkit and react-redux\n2. Create `store/index.ts`: `const store = configureStore({ reducer: {} })`, export `RootState = ReturnType<typeof store.getState>`, `AppDispatch = typeof store.dispatch`\n3. Create `store/hooks.ts`: typed wrappers `useAppDispatch = useDispatch.withTypes<AppDispatch>()`, `useAppSelector = useSelector.withTypes<RootState>()`\n4. Update main.tsx to wrap App with `<Provider store={store}>`\n\n**Tests:** App still renders; no console errors; TypeScript compiles.\n\n**Acceptance:** `npm run build -w web` succeeds; store is initialized (can verify via React DevTools or console log).",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 4,
+      "title": "Setup Express+TS server with health check and CORS",
+      "description": "Create the Express+TypeScript server in api/ with JSON middleware, CORS, health route, and configurable port.\n\n**What/Why:** REQ-028 requires Express+TS API. CORS allows the Vite dev server to call the API. Health check verifies the server runs.\n\n**Files:**\n- `api/package.json` — express, cors, typescript, tsx, @types/express, @types/cors\n- `api/tsconfig.json` — extends base, strict, outDir dist\n- `api/src/server.ts` — Express app with middleware and health route\n- `api/src/index.ts` — entry point that starts the server\n\n**Approach:**\n1. Add deps: express, cors, typescript, tsx (for dev), @types/express, @types/cors\n2. Create tsconfig.json extending base with `\"outDir\": \"dist\"`, `\"rootDir\": \"src\"`\n3. Create server.ts:\n   - `const app = express()`\n   - `app.use(cors({ origin: 'http://localhost:5173' }))`\n   - `app.use(express.json())`\n   - `app.get('/api/health', (req, res) => res.json({ status: 'ok' }))`\n   - Export app\n4. Create index.ts: `const PORT = process.env.PORT || 3001; app.listen(PORT)`\n5. Add scripts: `\"dev\": \"tsx watch src/index.ts\"`, `\"build\": \"tsc\"`, `\"start\": \"node dist/index.js\"`\n\n**Tests:** `npm run dev -w api`, then `curl localhost:3001/api/health` returns `{\"status\":\"ok\"}`\n\n**Acceptance:** API starts on port 3001; health endpoint returns JSON; CORS headers present for localhost:5173 origin.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 5,
+      "title": "Add better-sqlite3 and create DB bootstrap module",
+      "description": "Add better-sqlite3 and create a DB bootstrap module that opens/creates the SQLite file and enables foreign keys.\n\n**What/Why:** REQ-028/AC-030 require better-sqlite3 for persistence. Foreign keys must be enabled for cascade delete (AC-006).\n\n**Files:**\n- `api/package.json` — add better-sqlite3, @types/better-sqlite3\n- `api/src/db/index.ts` — DB bootstrap module\n\n**Approach:**\n1. Install better-sqlite3 and @types/better-sqlite3\n2. Create db/index.ts:\n   - Import Database from better-sqlite3\n   - `const DB_PATH = process.env.DB_PATH || './data/todo.db'`\n   - Ensure data directory exists (fs.mkdirSync with recursive)\n   - `const db = new Database(DB_PATH)`\n   - `db.pragma('foreign_keys = ON')`\n   - Export db instance and an `initSchema()` function (empty for now, will add tables in next task)\n3. Call initSchema() on module load or export for server startup\n\n**Tests:** Start API, verify `./data/todo.db` file is created; no errors on startup.\n\n**Acceptance:** better-sqlite3 installs without native module errors; DB file created in data/ directory; foreign_keys pragma is ON.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 6,
+      "title": "Define projects table schema and data-access functions",
+      "description": "Define the projects table schema and typed CRUD data-access functions.\n\n**What/Why:** The epic requires projects with id, name, description, created_at. Data-access module provides typed functions for REST routes.\n\n**Files:**\n- `api/src/db/index.ts` — update initSchema() with CREATE TABLE IF NOT EXISTS\n- `api/src/db/projects.ts` — typed data-access functions\n- `api/src/types/project.ts` — Project interface\n\n**Approach:**\n1. Create types/project.ts: `interface Project { id: number; name: string; description: string | null; created_at: string; }`\n2. Update db/index.ts initSchema():\n   ```sql\n   CREATE TABLE IF NOT EXISTS projects (\n     id INTEGER PRIMARY KEY AUTOINCREMENT,\n     name TEXT NOT NULL,\n     description TEXT,\n     created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n   );\n   ```\n3. Create db/projects.ts with functions:\n   - `createProject(name: string, description?: string): Project`\n   - `listProjects(): (Project & { task_count: number })[]` — LEFT JOIN tasks (table may not exist yet, handle gracefully or add placeholder)\n   - `getProject(id: number): Project | undefined`\n   - `updateProject(id: number, data: { name?: string; description?: string }): Project | undefined`\n   - `deleteProject(id: number): boolean`\n4. Use prepared statements for all queries\n\n**Tests:** Call each function manually via a test script or REPL; verify data round-trips.\n\n**Acceptance:** Projects table created; all 5 CRUD functions work and return typed results; schema is idempotent (restarts don't error).",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 7,
+      "title": "Build projects REST endpoints",
+      "description": "Implement the five REST endpoints for projects CRUD wired to the data-access module.\n\n**What/Why:** AC-001-006 require creating, listing, editing, selecting, and deleting projects via REST.\n\n**Files:**\n- `api/src/routes/projects.ts` — Express Router with all endpoints\n- `api/src/server.ts` — mount router at /api/projects\n\n**Approach:**\n1. Create routes/projects.ts with Router():\n   - `POST /` — validate name required, call createProject, return 201 + project\n   - `GET /` — call listProjects (with task_count), return 200 + array\n   - `GET /:id` — call getProject, return 200 or 404\n   - `PUT /:id` — validate body, call updateProject, return 200 or 404\n   - `DELETE /:id` — call deleteProject, return 204 or 404\n2. Add validation: name required for POST, id must be numeric\n3. Return proper HTTP status codes and JSON error bodies\n4. Mount in server.ts: `app.use('/api/projects', projectsRouter)`\n\n**Tests:**\n- POST with name returns 201 and project with id\n- POST without name returns 400\n- GET / returns array\n- GET /:id returns project or 404\n- PUT /:id updates and returns project or 404\n- DELETE /:id returns 204 or 404\n\n**Acceptance:** All 5 endpoints respond correctly; validation errors return 400; not-found returns 404.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 8,
+      "title": "Create typed API client module for web app",
+      "description": "Create a typed REST client for the web app that all Redux thunks will use.\n\n**What/Why:** AC-029 requires browser access DB only via REST. A typed client ensures type safety and centralizes API calls.\n\n**Files:**\n- `web/src/api/client.ts` — base fetch wrapper with error handling\n- `web/src/api/projects.ts` — typed project API functions\n- `web/src/types/project.ts` — shared Project type (mirror of API type)\n\n**Approach:**\n1. Create types/project.ts with Project interface matching API response\n2. Create api/client.ts:\n   - Base URL from env or default to ''\n   - `async function request<T>(path: string, options?: RequestInit): Promise<T>` — handles JSON parsing, throws on non-ok\n3. Create api/projects.ts:\n   - `createProject(data: { name: string; description?: string }): Promise<Project>`\n   - `listProjects(): Promise<ProjectWithCount[]>`\n   - `getProject(id: number): Promise<Project>`\n   - `updateProject(id: number, data: Partial<Project>): Promise<Project>`\n   - `deleteProject(id: number): Promise<void>`\n\n**Tests:** TypeScript compiles; functions are callable (integration tested via thunks later).\n\n**Acceptance:** All 5 API functions exist with correct types; client handles JSON and errors.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 9,
+      "title": "Create projects Redux slice with async thunks",
+      "description": "Create the projects Redux slice with async thunks calling the API client, plus loading/error state.\n\n**What/Why:** Redux manages UI state; thunks handle async API calls. Loading/error state provides user feedback.\n\n**Files:**\n- `web/src/store/projectsSlice.ts` — slice with state, reducers, thunks\n- `web/src/store/index.ts` — add projects reducer to store\n\n**Approach:**\n1. Create projectsSlice.ts:\n   - State: `{ items: Project[], selectedId: number | null, loading: boolean, error: string | null }`\n   - Async thunks: `fetchProjects`, `createProject`, `updateProject`, `deleteProject`\n   - Extra reducers handle pending/fulfilled/rejected for each thunk\n   - Sync action: `selectProject(id)` to set selectedId\n2. Export slice.reducer and all actions/thunks\n3. Add to store: `reducer: { projects: projectsReducer }`\n\n**Tests:** TypeScript compiles; can dispatch fetchProjects and state updates.\n\n**Acceptance:** Slice exports reducer + thunks; store includes projects state; dispatching fetchProjects updates items array.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 10,
+      "title": "Build project list UI component",
+      "description": "Build the project list component showing name and task count for each project.\n\n**What/Why:** AC-002 requires displaying every project with name and task count.\n\n**Files:**\n- `web/src/features/projects/ProjectList.tsx` — list component\n- `web/src/App.tsx` — render ProjectList\n- `web/src/index.css` or styles — basic styling\n\n**Approach:**\n1. Create ProjectList.tsx:\n   - Use useAppSelector to get projects.items, loading, error\n   - Use useAppDispatch + useEffect to fetchProjects on mount\n   - Map projects to list items showing name and task_count\n   - Show loading indicator when loading\n   - Show error message when error\n   - Highlight selected project (projects.selectedId)\n2. Add click handler to dispatch selectProject(id)\n3. Add to App.tsx in a sidebar layout\n\n**Tests:** Start both servers; project list renders; creating a project via curl shows it after refresh.\n\n**Acceptance:** Project list displays all projects with names and task counts; clicking selects; loading/error states visible.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 11,
+      "title": "Build project create/edit form",
+      "description": "Build the form component for creating and editing projects.\n\n**What/Why:** AC-001/AC-003 require creating projects with name and editing name/description.\n\n**Files:**\n- `web/src/features/projects/ProjectForm.tsx` — form component\n- `web/src/features/projects/ProjectList.tsx` — add create button, edit button per item\n\n**Approach:**\n1. Create ProjectForm.tsx:\n   - Props: `project?: Project` (undefined = create mode), `onClose: () => void`\n   - Controlled inputs for name (required) and description (optional)\n   - On submit: dispatch createProject or updateProject thunk\n   - Show validation error if name empty\n   - Call onClose after successful save\n2. Add state in ProjectList for showing form (create vs edit mode)\n3. Add \"New Project\" button that opens form in create mode\n4. Add edit button/icon per project that opens form in edit mode with project data\n\n**Tests:** Create project via form — appears in list; edit project — changes persist after reload.\n\n**Acceptance:** Can create project with name; can edit existing project; changes persist (reload shows them); validation prevents empty name.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 12,
+      "title": "Build project delete with confirmation prompt",
+      "description": "Implement project deletion with a confirmation prompt before cascade delete.\n\n**What/Why:** AC-005/AC-006 require delete with confirmation. Cascade delete of tasks is DB-level (foreign key ready for tasks table).\n\n**Files:**\n- `web/src/features/projects/ProjectList.tsx` — add delete button with confirm\n- `web/src/features/projects/ConfirmDialog.tsx` — reusable confirmation dialog (optional, can use window.confirm initially)\n\n**Approach:**\n1. Add delete button/icon per project in list\n2. On click: show confirmation (start with `window.confirm('Delete project X and all its tasks?')`)\n3. If confirmed: dispatch deleteProject thunk\n4. After success: if deleted project was selected, clear selectedId\n5. Handle error state if delete fails\n\n**Schema note:** The projects table is ready; when tasks table is added later with `FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE`, deletes will cascade automatically.\n\n**Tests:** Delete project via UI with confirm — removed from list; cancel — project remains; deleted project stays gone after reload.\n\n**Acceptance:** Delete button shows confirmation before deleting; confirmed delete removes project; canceled delete keeps project; deletion persists.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 13,
+      "title": "Document install and run commands in README",
+      "description": "Create README with install and run commands; verify data persists across restart.\n\n**What/Why:** AC-027/AC-028 require documented commands and persistence verification.\n\n**Files:**\n- `README.md` — project documentation\n\n**Approach:**\n1. Create README.md with sections:\n   - Project name and one-line description\n   - Prerequisites (Node.js version, npm)\n   - Install: `npm install`\n   - Run development: `npm run dev` (starts both API and web)\n   - Run API only: `npm run dev -w api`\n   - Run web only: `npm run dev -w web`\n   - Build: `npm run build`\n   - Data location: `./data/todo.db`\n2. Document that data persists in SQLite file across restarts\n3. Note: better-sqlite3 requires Node.js version compatible with native modules\n\n**Tests:** Follow README steps on clean clone — app runs.\n\n**Acceptance:** README exists with clear install/run commands; following them starts the app successfully.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    },
+    {
+      "id": 14,
+      "title": "Add integration tests for projects endpoints",
+      "description": "Add integration tests for all five projects endpoints covering happy path, not-found, and validation errors.\n\n**What/Why:** Epic requires integration tests for all endpoints plus smoke test for web build and store init.\n\n**Files:**\n- `api/package.json` — add vitest, supertest\n- `api/vitest.config.ts` — test config\n- `api/src/routes/projects.test.ts` — integration tests\n- `web/package.json` — add vitest\n- `web/src/store/index.test.ts` — smoke test for store init\n\n**Approach:**\n1. API tests (using supertest):\n   - POST /api/projects — valid returns 201 + project; missing name returns 400\n   - GET /api/projects — returns array (empty or with items)\n   - GET /api/projects/:id — existing returns 200; non-existent returns 404\n   - PUT /api/projects/:id — existing updates and returns 200; non-existent returns 404\n   - DELETE /api/projects/:id — existing returns 204; non-existent returns 404\n2. Use test DB (in-memory or temp file) to isolate tests\n3. Web smoke test: import store, assert it initializes without error\n4. Add test scripts to both package.json files\n\n**Tests:** `npm test -w api` and `npm test -w web` pass.\n\n**Acceptance:** All endpoint tests pass; validation errors tested; 404 cases tested; web store smoke test passes.",
+      "status": "backlog",
+      "devIterations": 0,
+      "createdAt": "2026-08-27T16:38:16.614Z",
+      "updatedAt": "2026-08-27T16:38:16.614Z"
+    }
+  ],
+  "currentTaskNum": 1,
+  "totalLLMCalls": 3,
+  "maxLLMCalls": 500,
+  "nextTask": {
+    "taskId": 1,
+    "content": "## Task: Initialize monorepo with web/ and api/ workspaces\n\nCreate the two-workspace monorepo structure with root orchestration scripts.\n\n**What/Why:** The epic requires a `web/` (Vite React+TS) workspace and an `api/` (Express+TS) workspace. Root scripts coordinate install and run for both.\n\n**Files:**\n- `package.json` (root) — workspaces config, scripts: `install`, `dev`, `build`\n- `web/package.json` — placeholder, name `@project-todo-manager/web`\n- `api/package.json` — placeholder, name `@project-todo-manager/api`\n- `.gitignore` — node_modules, dist, *.db files\n- `tsconfig.base.json` — shared TS config for both workspaces to extend\n\n**Approach:**\n1. Create root `package.json` with `\"workspaces\": [\"web\", \"api\"]`\n2. Add scripts: `\"dev\": \"concurrently \\\"npm run dev -w api\\\" \\\"npm run dev -w web\\\"\"` etc.\n3. Create `web/package.json` and `api/package.json` with placeholder scripts\n4. Create shared `tsconfig.base.json` with strict mode, ES2022 target\n5. Add `.gitignore` for node_modules, dist, *.sqlite, *.db\n\n**Tests:** Run `npm install` at root — should succeed without errors.\n\n**Acceptance:** `ls web api` shows both directories; `cat package.json` shows workspaces array; `npm install` completes.",
+    "updatedAt": "2026-08-27T16:38:16.618Z"
+  },
+  "feedback": {
+    "taskId": 1,
+    "content": "<status>verified</status>\n",
+    "updatedAt": "2026-08-27T16:39:57.924Z"
+  },
+  "lastUpdated": "2026-08-27T16:39:57.927Z"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@project-todo-manager/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"api dev server not scaffolded yet\"",
+    "build": "echo \"api build not scaffolded yet\""
+  }
+}

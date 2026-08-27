@@ -1,0 +1,38 @@
+{
+  "maxLLMCalls": 500,
+  "planModel": "claude-opus-4-5",
+  "devModel": "claude-sonnet-5",
+  "qaModel": "claude-sonnet-5",
+  "devReasoningEffort": "xhigh",
+  "qaReasoningEffort": "high",
+  "autoCommit": true,
+  "planFrequency": 1,
+  "minBacklogSize": 3,
+  "agentBackend": "claude",
+  "fleetMode": true,
+  "useDocker": false,
+  "dockerComposeFile": "",
+  "dockerService": "ralph-agent",
+  "epicBaseBranch": "",
+  "dockerWorkBranch": "",
+  "dockerIsolateBranch": true,
+  "dockerMergeStrategy": "work-branch",
+  "dockerPoolSize": 1,
+  "dockerParallelTasks": false,
+  "dockerPlanParallel": false,
+  "dockerInstalledBackends": [],
+  "dockerMountSocket": false,
+  "dockerAutoMergeEpicWork": true,
+  "copilotOutputFormat": "streaming",
+  "epicFile": "docs/epics/epic-001-foundation-scaffold.plan.md",
+  "requirementsFile": "",
+  "pauseAfterPlan": false,
+  "taskColumnSort": "updatedAtDesc",
+  "savedModelsByBackend": {
+    "copilot": {
+      "planModel": "claude-sonnet-5",
+      "devModel": "gpt-5.4-mini",
+      "qaModel": "gpt-5.4-mini"
+    }
+  }
+}
