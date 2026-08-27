@@ -31,10 +31,10 @@
       "id": 4,
       "title": "Setup Express+TS server with health check and CORS",
       "description": "Create the Express+TypeScript server in api/ with JSON middleware, CORS, health route, and configurable port.\n\n**What/Why:** REQ-028 requires Express+TS API. CORS allows the Vite dev server to call the API. Health check verifies the server runs.\n\n**Files:**\n- `api/package.json` — express, cors, typescript, tsx, @types/express, @types/cors\n- `api/tsconfig.json` — extends base, strict, outDir dist\n- `api/src/server.ts` — Express app with middleware and health route\n- `api/src/index.ts` — entry point that starts the server\n\n**Approach:**\n1. Add deps: express, cors, typescript, tsx (for dev), @types/express, @types/cors\n2. Create tsconfig.json extending base with `\"outDir\": \"dist\"`, `\"rootDir\": \"src\"`\n3. Create server.ts:\n   - `const app = express()`\n   - `app.use(cors({ origin: 'http://localhost:5173' }))`\n   - `app.use(express.json())`\n   - `app.get('/api/health', (req, res) => res.json({ status: 'ok' }))`\n   - Export app\n4. Create index.ts: `const PORT = process.env.PORT || 3001; app.listen(PORT)`\n5. Add scripts: `\"dev\": \"tsx watch src/index.ts\"`, `\"build\": \"tsc\"`, `\"start\": \"node dist/index.js\"`\n\n**Tests:** `npm run dev -w api`, then `curl localhost:3001/api/health` returns `{\"status\":\"ok\"}`\n\n**Acceptance:** API starts on port 3001; health endpoint returns JSON; CORS headers present for localhost:5173 origin.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:56:25.971Z"
     },
     {
       "id": 5,
@@ -43,7 +43,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 6,
@@ -52,7 +52,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 7,
@@ -61,7 +61,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 8,
@@ -70,7 +70,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 9,
@@ -79,7 +79,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 10,
@@ -88,7 +88,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 11,
@@ -97,7 +97,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 12,
@@ -106,7 +106,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 13,
@@ -115,7 +115,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     },
     {
       "id": 14,
@@ -124,21 +124,21 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:48:25.194Z"
+      "updatedAt": "2026-08-27T16:52:08.976Z"
     }
   ],
-  "currentTaskNum": 3,
-  "totalLLMCalls": 9,
+  "currentTaskNum": 4,
+  "totalLLMCalls": 12,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 3,
-    "content": "## Task: Configure Redux store with typed hooks in web/\n\nSet up Redux Toolkit with typed root state and typed dispatch/selector hooks.\n\n**What/Why:** REQ-027 requires Redux for state management. Typed hooks prevent type errors throughout the app.\n\n**Files:**\n- `web/src/store/index.ts` — configureStore, export store, RootState, AppDispatch types\n- `web/src/store/hooks.ts` — useAppDispatch, useAppSelector typed hooks\n- `web/src/main.tsx` — wrap App with Provider\n- `web/package.json` — add @reduxjs/toolkit, react-redux\n\n**Approach:**\n1. Install @reduxjs/toolkit and react-redux\n2. Create `store/index.ts`: `const store = configureStore({ reducer: {} })`, export `RootState = ReturnType<typeof store.getState>`, `AppDispatch = typeof store.dispatch`\n3. Create `store/hooks.ts`: typed wrappers `useAppDispatch = useDispatch.withTypes<AppDispatch>()`, `useAppSelector = useSelector.withTypes<RootState>()`\n4. Update main.tsx to wrap App with `<Provider store={store}>`\n\n**Tests:** App still renders; no console errors; TypeScript compiles.\n\n**Acceptance:** `npm run build -w web` succeeds; store is initialized (can verify via React DevTools or console log).",
-    "updatedAt": "2026-08-27T16:48:25.198Z"
+    "taskId": 4,
+    "content": "## Task: Setup Express+TS server with health check and CORS\n\nCreate the Express+TypeScript server in api/ with JSON middleware, CORS, health route, and configurable port.\n\n**What/Why:** REQ-028 requires Express+TS API. CORS allows the Vite dev server to call the API. Health check verifies the server runs.\n\n**Files:**\n- `api/package.json` — express, cors, typescript, tsx, @types/express, @types/cors\n- `api/tsconfig.json` — extends base, strict, outDir dist\n- `api/src/server.ts` — Express app with middleware and health route\n- `api/src/index.ts` — entry point that starts the server\n\n**Approach:**\n1. Add deps: express, cors, typescript, tsx (for dev), @types/express, @types/cors\n2. Create tsconfig.json extending base with `\"outDir\": \"dist\"`, `\"rootDir\": \"src\"`\n3. Create server.ts:\n   - `const app = express()`\n   - `app.use(cors({ origin: 'http://localhost:5173' }))`\n   - `app.use(express.json())`\n   - `app.get('/api/health', (req, res) => res.json({ status: 'ok' }))`\n   - Export app\n4. Create index.ts: `const PORT = process.env.PORT || 3001; app.listen(PORT)`\n5. Add scripts: `\"dev\": \"tsx watch src/index.ts\"`, `\"build\": \"tsc\"`, `\"start\": \"node dist/index.js\"`\n\n**Tests:** `npm run dev -w api`, then `curl localhost:3001/api/health` returns `{\"status\":\"ok\"}`\n\n**Acceptance:** API starts on port 3001; health endpoint returns JSON; CORS headers present for localhost:5173 origin.",
+    "updatedAt": "2026-08-27T16:52:08.979Z"
   },
   "feedback": {
-    "taskId": 3,
-    "content": "Everything checks out: files match the task spec exactly, `npm run build -w web` succeeds (tsc + vite build), the dev server serves the app with the Redux `Provider` correctly wrapping `App`, and `hooks.ts` uses the modern `.withTypes<T>()` API consistent with prior memory notes. No stray build artifacts in git status.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-27T16:50:22.706Z"
+    "taskId": 4,
+    "content": "Task 4 is complete and verified: the Express+TS server builds cleanly, both dev (`tsx watch`) and production (`node dist/index.js`) modes serve `GET /api/health` → `{\"status\":\"ok\"}`, CORS headers for `http://localhost:5173` are present, the port is configurable via `PORT` env (defaulting to 3001), and the ESM `.js`-extension import convention from prior memory notes was followed correctly. All acceptance criteria are met.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-27T16:56:25.970Z"
   },
-  "lastUpdated": "2026-08-27T16:50:22.708Z"
+  "lastUpdated": "2026-08-27T16:56:25.971Z"
 }

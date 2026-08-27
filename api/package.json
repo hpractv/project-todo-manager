@@ -4,7 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "echo \"api dev server not scaffolded yet\"",
-    "build": "echo \"api build not scaffolded yet\""
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "tsx": "^4.23.12",
+    "typescript": "^5.6.3"
   }
 }
