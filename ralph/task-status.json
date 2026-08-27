@@ -94,19 +94,19 @@
       "id": 11,
       "title": "Build ProjectForm component for create and edit",
       "description": "**What/Why:** The epic requires a create/edit form for projects. This component handles both modes: creating a new project or editing an existing one.\n\n**Files:**\n- `web/src/features/projects/ProjectForm.tsx` (new) - Form with `name` (required text input) and `description` (optional textarea). Props: `project?: Project` (if provided, edit mode; otherwise create mode), `onClose?: () => void`. On submit: dispatch `createProject` or `updateProject` thunk, then call onClose.\n- Update `web/src/features/projects/index.ts` to export ProjectForm.\n\n**Approach:** Use controlled inputs with useState. Validate name is non-empty before submit (match API's 400 behavior). Clear form after successful create. In edit mode, pre-populate fields from the project prop. Disable submit button while loading.\n\n**Tests to run:** `npm run build -w web`. Manual: render form in App, fill in name, submit - project appears in list; edit existing project - changes persist after reload.\n\n**Acceptance:** Form creates new projects and edits existing ones, validation prevents empty names, successful operations update the Redux store and persist to DB.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T17:23:22.513Z"
+      "updatedAt": "2026-08-27T17:38:16.912Z"
     },
     {
       "id": 12,
       "title": "Add delete confirmation and wire UI to App",
-      "description": "**What/Why:** The epic requires delete-with-confirmation and the UI components must be integrated into App.tsx for end-to-end functionality. This completes the projects UI slice.\n\n**Files:**\n- `web/src/features/projects/DeleteConfirmDialog.tsx` (new) - Modal/dialog that shows 'Are you sure you want to delete project X?' with Confirm and Cancel buttons. On confirm: dispatch `deleteProject(id)` and close. Uses native `<dialog>` element or a simple div overlay.\n- `web/src/App.tsx` (modify) - Import and render ProjectList, ProjectForm, and DeleteConfirmDialog. Add state for: `showForm: boolean`, `editingProject: Project | null`, `deletingProject: Project | null`. Render the form when showForm is true or editingProject is set. Render the dialog when deletingProject is set.\n- Update `web/src/features/projects/index.ts` to export DeleteConfirmDialog.\n\n**Approach:** Add buttons in ProjectList for Edit (opens form with project) and Delete (opens confirm dialog). Add a 'New Project' button that opens the empty form. Keep it minimal - no routing needed.\n\n**Tests to run:** `npm run build -w web`. Manual E2E: start both servers, create project, edit it, delete it with confirmation, verify persistence across reload.\n\n**Acceptance:** All CRUD operations work from UI, delete shows confirmation prompt, AC-001 through AC-006 pass manual verification.",
+      "description": "**What/Why:** The epic requires delete-with-confirmation and the UI components must be integrated into App.tsx for end-to-end functionality. This completes the projects UI slice.\n\n**Files:**\n- `web/src/features/projects/DeleteConfirmDialog.tsx` (new) - Modal/dialog that shows 'Are you sure you want to delete project X?' with Confirm and Cancel buttons. On confirm: dispatch `deleteProject(id)` and close. Uses native `<dialog>` element or a simple div overlay.\n- `web/src/App.tsx` (modify) - Import and render ProjectList, ProjectForm, and DeleteConfirmDialog. Add state for: `showForm: boolean`, `editingProject: Project | null`, `deletingProject: Project | null`. Render the form when showForm is true or editingProject is set. Render the dialog when deletingProject is set.\n- Update `web/src/features/projects/index.ts` to export DeleteConfirmDialog.\n\n**Approach:** Add buttons in ProjectList for Edit (opens form with project) and Delete (opens confirm dialog). Add a 'New Project' button that opens the empty form. Keep it minimal - no routing needed.\n\n**Cascade readiness:** `PRAGMA foreign_keys = ON` is already enabled in db/index.ts. The tasks table (next epic) will use `REFERENCES projects(id) ON DELETE CASCADE` to cascade deletes.\n\n**Tests to run:** `npm run build -w web`. Manual E2E: start both servers, create project, edit it, delete it with confirmation, verify persistence across reload.\n\n**Acceptance:** All CRUD operations work from UI, delete shows confirmation prompt, AC-001 through AC-006 pass manual verification.",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T17:23:22.513Z"
+      "updatedAt": "2026-08-27T17:30:14.987Z"
     },
     {
       "id": 13,
@@ -115,16 +115,16 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:12:32.528Z",
-      "updatedAt": "2026-08-27T17:23:22.513Z"
+      "updatedAt": "2026-08-27T17:30:14.987Z"
     },
     {
       "id": 14,
       "title": "Add API integration tests for projects endpoints",
-      "description": "**What/Why:** The epic requires integration tests for all 5 projects endpoints covering happy path, not-found, and validation errors.\n\n**Files:**\n- `api/package.json` (modify) - Add vitest + @vitest/coverage-v8 + supertest to devDependencies, add `\"test\": \"vitest run\"` script.\n- `api/vitest.config.ts` (new) - Configure Vitest for Node environment.\n- `api/src/routes/projects.test.ts` (new) - Integration tests using supertest against the Express app.\n\n**Test cases:**\n- POST /api/projects: success (201 + body), validation error for missing name (400).\n- GET /api/projects: returns array with task_count.\n- GET /api/projects/:id: success (200), not found (404).\n- PUT /api/projects/:id: success (200), not found (404), validation error (400).\n- DELETE /api/projects/:id: success (204), not found (404).\n\n**Approach:** Use a separate test DB file (e.g. `DB_PATH=./data/test.db`) to isolate tests. Import the Express app from server.ts (export it), use supertest to make requests. Clean up test DB after tests.\n\n**Tests to run:** `npm run test -w api` should pass all tests.\n\n**Acceptance:** All 5 endpoints have tests, happy path + error cases covered, `npm run test -w api` exits 0.",
+      "description": "**What/Why:** The epic requires integration tests for all 5 projects endpoints covering happy path, not-found, and validation errors.\n\n**Files:**\n- `api/package.json` (modify) - Add vitest + supertest + @types/supertest to devDependencies, add `\"test\": \"vitest run\"` script.\n- `api/vitest.config.ts` (new) - Configure Vitest for Node environment.\n- `api/src/routes/projects.test.ts` (new) - Integration tests using supertest against the Express app.\n\n**Test cases:**\n- POST /api/projects: success (201 + body), validation error for missing name (400).\n- GET /api/projects: returns array with task_count.\n- GET /api/projects/:id: success (200), not found (404).\n- PUT /api/projects/:id: success (200), not found (404), validation error (400).\n- DELETE /api/projects/:id: success (204), not found (404).\n\n**Approach:** Use a separate test DB file (e.g. `DB_PATH=./data/test.db`) to isolate tests. Export the Express app from server.ts, use supertest to make requests. Clean up test DB before/after tests.\n\n**Tests to run:** `npm run test -w api` should pass all tests.\n\n**Acceptance:** All 5 endpoints have tests, happy path + error cases covered, `npm run test -w api` exits 0.",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:23:22.513Z"
+      "updatedAt": "2026-08-27T17:30:14.987Z"
     },
     {
       "id": 15,
@@ -133,21 +133,21 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:23:22.513Z"
+      "updatedAt": "2026-08-27T17:30:14.987Z"
     }
   ],
-  "currentTaskNum": 10,
-  "totalLLMCalls": 30,
+  "currentTaskNum": 11,
+  "totalLLMCalls": 33,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 10,
-    "content": "## Task: Build ProjectList component with select interaction\n\n**What/Why:** The epic requires a project list showing name and task count, with a select-project interaction. This component displays all projects and lets the user click one to select it.\n\n**Files:**\n- `web/src/features/projects/ProjectList.tsx` (new) - React component that: dispatches `fetchProjects` on mount, maps over `selectAllProjects` to render each project's name + task_count, highlights the currently selected project (from `selectSelectedProject`), and dispatches `selectProject(id)` on click.\n- `web/src/features/projects/index.ts` (new) - barrel export for the features/projects folder.\n\n**Approach:** Use `useAppSelector` and `useAppDispatch` hooks from store/hooks.ts. Style the selected project distinctly (e.g. bold or background color). Show loading state while `selectProjectsLoading` is true. Display error message if `selectProjectsError` is set.\n\n**Tests to run:** `npm run build -w web` compiles. Manual: start both servers, create a project via curl, open browser - project appears in list, clicking it highlights it.\n\n**Acceptance:** Project list renders all projects with name + task_count, clicking a project visually selects it and updates Redux state.",
-    "updatedAt": "2026-08-27T17:23:22.515Z"
+    "taskId": 11,
+    "content": "## Task: Build ProjectForm component for create and edit\n\n**What/Why:** The epic requires a create/edit form for projects. This component handles both modes: creating a new project or editing an existing one.\n\n**Files:**\n- `web/src/features/projects/ProjectForm.tsx` (new) - Form with `name` (required text input) and `description` (optional textarea). Props: `project?: Project` (if provided, edit mode; otherwise create mode), `onClose?: () => void`. On submit: dispatch `createProject` or `updateProject` thunk, then call onClose.\n- Update `web/src/features/projects/index.ts` to export ProjectForm.\n\n**Approach:** Use controlled inputs with useState. Validate name is non-empty before submit (match API's 400 behavior). Clear form after successful create. In edit mode, pre-populate fields from the project prop. Disable submit button while loading.\n\n**Tests to run:** `npm run build -w web`. Manual: render form in App, fill in name, submit - project appears in list; edit existing project - changes persist after reload.\n\n**Acceptance:** Form creates new projects and edits existing ones, validation prevents empty names, successful operations update the Redux store and persist to DB.",
+    "updatedAt": "2026-08-27T17:30:14.991Z"
   },
   "feedback": {
-    "taskId": 10,
-    "content": "# QA Result\n\nVerified `ProjectList.tsx` and `index.ts` against the task spec:\n- Dispatches `fetchProjects` on mount, renders each project as `name (task_count)`, highlights the selected project (bold + background + `aria-pressed`), dispatches `selectProject(id)` on click.\n- Loading and error states both handled per spec.\n- `App.tsx` correctly renders `<ProjectList />` so the component is reachable.\n- `npm run build -w web` compiles cleanly.\n- Live browser test (headless Chrome + puppeteer-core against the real compiled API and real Redux store): projects render with correct name/task_count, clicking toggles selection styling and `aria-pressed`, and selecting a second project correctly deselects the first — confirms the Redux state update round-trips through a real click, not just unit logic.\n\nNo issues found. No test artifacts leaked into git status after cleanup.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-27T17:28:46.851Z"
+    "taskId": 11,
+    "content": "<status>verified</status>\n",
+    "updatedAt": "2026-08-27T17:38:16.909Z"
   },
-  "lastUpdated": "2026-08-27T17:28:46.852Z"
+  "lastUpdated": "2026-08-27T17:38:16.912Z"
 }
