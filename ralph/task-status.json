@@ -85,10 +85,10 @@
       "id": 10,
       "title": "Build ProjectList component with select interaction",
       "description": "**What/Why:** The epic requires a project list showing name and task count, with a select-project interaction. This component displays all projects and lets the user click one to select it.\n\n**Files:**\n- `web/src/features/projects/ProjectList.tsx` (new) - React component that: dispatches `fetchProjects` on mount, maps over `selectAllProjects` to render each project's name + task_count, highlights the currently selected project (from `selectSelectedProject`), and dispatches `selectProject(id)` on click.\n- `web/src/features/projects/index.ts` (new) - barrel export for the features/projects folder.\n\n**Approach:** Use `useAppSelector` and `useAppDispatch` hooks from store/hooks.ts. Style the selected project distinctly (e.g. bold or background color). Show loading state while `selectProjectsLoading` is true. Display error message if `selectProjectsError` is set.\n\n**Tests to run:** `npm run build -w web` compiles. Manual: start both servers, create a project via curl, open browser - project appears in list, clicking it highlights it.\n\n**Acceptance:** Project list renders all projects with name + task_count, clicking a project visually selects it and updates Redux state.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T17:17:46.748Z"
+      "updatedAt": "2026-08-27T17:28:46.852Z"
     },
     {
       "id": 11,
@@ -97,7 +97,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T17:17:46.748Z"
+      "updatedAt": "2026-08-27T17:23:22.513Z"
     },
     {
       "id": 12,
@@ -106,7 +106,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T17:17:46.748Z"
+      "updatedAt": "2026-08-27T17:23:22.513Z"
     },
     {
       "id": 13,
@@ -115,7 +115,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:12:32.528Z",
-      "updatedAt": "2026-08-27T17:17:46.748Z"
+      "updatedAt": "2026-08-27T17:23:22.513Z"
     },
     {
       "id": 14,
@@ -124,7 +124,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:17:46.748Z"
+      "updatedAt": "2026-08-27T17:23:22.513Z"
     },
     {
       "id": 15,
@@ -133,21 +133,21 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T17:17:46.748Z",
-      "updatedAt": "2026-08-27T17:17:46.748Z"
+      "updatedAt": "2026-08-27T17:23:22.513Z"
     }
   ],
-  "currentTaskNum": 9,
-  "totalLLMCalls": 27,
+  "currentTaskNum": 10,
+  "totalLLMCalls": 30,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 9,
-    "content": "## Task: Create projects Redux slice with async thunks\n\n**What/Why:** The store currently has an empty reducer `{}`. Create a projectsSlice that holds the projects array, selectedProjectId, loading, and error state, plus async thunks that call the typed API client from task 8.\n\n**Files:**\n- `web/src/store/projectsSlice.ts` (new) - createSlice with: initial state `{projects: [], selectedProjectId: null, loading: false, error: null}`, extraReducers handling pending/fulfilled/rejected for each thunk, and a `selectProject` sync action.\n- `web/src/store/index.ts` (modify) - import projectsReducer and add to `reducer: {projects: projectsReducer}`.\n\n**Async thunks:** `fetchProjects`, `createProject`, `updateProject`, `deleteProject` - each wrapping the corresponding `web/src/api/client.ts` function.\n\n**Approach:** Use RTK's createAsyncThunk. For delete, the thunk should return the deleted id so the reducer can filter it out. Export typed selectors: `selectAllProjects`, `selectSelectedProject`, `selectProjectsLoading`, `selectProjectsError`.\n\n**Tests to run:** `npm run build -w web` must compile cleanly. Manual: import hooks in a throwaway component and log state.\n\n**Acceptance:** Store contains projects slice, dispatching `fetchProjects()` populates state from API, selecting a project updates `selectedProjectId`.",
-    "updatedAt": "2026-08-27T17:17:46.751Z"
+    "taskId": 10,
+    "content": "## Task: Build ProjectList component with select interaction\n\n**What/Why:** The epic requires a project list showing name and task count, with a select-project interaction. This component displays all projects and lets the user click one to select it.\n\n**Files:**\n- `web/src/features/projects/ProjectList.tsx` (new) - React component that: dispatches `fetchProjects` on mount, maps over `selectAllProjects` to render each project's name + task_count, highlights the currently selected project (from `selectSelectedProject`), and dispatches `selectProject(id)` on click.\n- `web/src/features/projects/index.ts` (new) - barrel export for the features/projects folder.\n\n**Approach:** Use `useAppSelector` and `useAppDispatch` hooks from store/hooks.ts. Style the selected project distinctly (e.g. bold or background color). Show loading state while `selectProjectsLoading` is true. Display error message if `selectProjectsError` is set.\n\n**Tests to run:** `npm run build -w web` compiles. Manual: start both servers, create a project via curl, open browser - project appears in list, clicking it highlights it.\n\n**Acceptance:** Project list renders all projects with name + task_count, clicking a project visually selects it and updates Redux state.",
+    "updatedAt": "2026-08-27T17:23:22.515Z"
   },
   "feedback": {
-    "taskId": 9,
-    "content": "Everything checks out:\n\n- `web/src/store/projectsSlice.ts` matches the spec exactly: initial state shape, four thunks (`fetchProjects`, `createProject`, `updateProject`, `deleteProject`) wrapping the typed API client, `deleteProject` resolves to the id, `selectProject` sync action, and all four typed selectors.\n- `web/src/store/index.ts` correctly wires `projectsReducer` in under `projects`.\n- `npm run build -w web` compiles cleanly (tsc + vite build).\n- Live end-to-end smoke test against the real compiled API (temp DB/port) confirmed: `fetchProjects` populates state, `createProject`/`updateProject`/`deleteProject` mutate state correctly, `selectProject` updates `selectedProjectId` and clears on delete of the selected project, and a rejected thunk (delete of a nonexistent id) sets `error` via `action.error.message`.\n- No test artifacts leaked into git status after cleanup.\n\nNo issues found.\n\n# Feedback\nNone.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-27T17:21:55.989Z"
+    "taskId": 10,
+    "content": "# QA Result\n\nVerified `ProjectList.tsx` and `index.ts` against the task spec:\n- Dispatches `fetchProjects` on mount, renders each project as `name (task_count)`, highlights the selected project (bold + background + `aria-pressed`), dispatches `selectProject(id)` on click.\n- Loading and error states both handled per spec.\n- `App.tsx` correctly renders `<ProjectList />` so the component is reachable.\n- `npm run build -w web` compiles cleanly.\n- Live browser test (headless Chrome + puppeteer-core against the real compiled API and real Redux store): projects render with correct name/task_count, clicking toggles selection styling and `aria-pressed`, and selecting a second project correctly deselects the first — confirms the Redux state update round-trips through a real click, not just unit logic.\n\nNo issues found. No test artifacts leaked into git status after cleanup.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-27T17:28:46.851Z"
   },
-  "lastUpdated": "2026-08-27T17:21:55.991Z"
+  "lastUpdated": "2026-08-27T17:28:46.852Z"
 }
