@@ -11,7 +11,14 @@ export const db = new Database(DB_PATH);
 db.pragma('foreign_keys = ON');
 
 export function initSchema(): void {
-  // Table definitions are added here as features are implemented.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS projects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
 }
 
 initSchema();

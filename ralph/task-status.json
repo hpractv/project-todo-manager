@@ -49,10 +49,10 @@
       "id": 6,
       "title": "Define projects table schema and data-access functions",
       "description": "Define the projects table schema and typed CRUD data-access functions.\n\n**What/Why:** The epic requires projects with id, name, description, created_at. Data-access module provides typed functions for REST routes.\n\n**Files:**\n- `api/src/db/index.ts` — update initSchema() with CREATE TABLE IF NOT EXISTS\n- `api/src/db/projects.ts` — typed data-access functions\n- `api/src/types/project.ts` — Project interface\n\n**Approach:**\n1. Create types/project.ts: `interface Project { id: number; name: string; description: string | null; created_at: string; }`\n2. Update db/index.ts initSchema():\n   ```sql\n   CREATE TABLE IF NOT EXISTS projects (\n     id INTEGER PRIMARY KEY AUTOINCREMENT,\n     name TEXT NOT NULL,\n     description TEXT,\n     created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n   );\n   ```\n3. Create db/projects.ts with functions:\n   - `createProject(name: string, description?: string): Project`\n   - `listProjects(): (Project & { task_count: number })[]` — use subquery placeholder returning 0 until tasks table exists\n   - `getProject(id: number): Project | undefined`\n   - `updateProject(id: number, data: { name?: string; description?: string }): Project | undefined`\n   - `deleteProject(id: number): boolean`\n4. Use prepared statements for all queries\n\n**Tests:** Call each function manually via a test script or REPL; verify data round-trips.\n\n**Acceptance:** Projects table created; all 5 CRUD functions work and return typed results; schema is idempotent (restarts don't error).",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:05:48.193Z"
     },
     {
       "id": 7,
@@ -61,7 +61,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     },
     {
       "id": 8,
@@ -70,7 +70,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     },
     {
       "id": 9,
@@ -79,7 +79,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     },
     {
       "id": 10,
@@ -88,7 +88,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     },
     {
       "id": 11,
@@ -97,7 +97,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     },
     {
       "id": 12,
@@ -106,7 +106,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     },
     {
       "id": 13,
@@ -115,7 +115,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     },
     {
       "id": 14,
@@ -124,21 +124,21 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-27T16:38:16.614Z",
-      "updatedAt": "2026-08-27T16:58:05.240Z"
+      "updatedAt": "2026-08-27T17:03:59.050Z"
     }
   ],
-  "currentTaskNum": 5,
-  "totalLLMCalls": 15,
+  "currentTaskNum": 6,
+  "totalLLMCalls": 18,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 5,
-    "content": "## Task: Add better-sqlite3 and create DB bootstrap module\n\nAdd better-sqlite3 and create a DB bootstrap module that opens/creates the SQLite file and enables foreign keys.\n\n**What/Why:** REQ-028/AC-030 require better-sqlite3 for persistence. Foreign keys must be enabled for cascade delete (AC-006).\n\n**Files:**\n- `api/package.json` — add better-sqlite3, @types/better-sqlite3\n- `api/src/db/index.ts` — DB bootstrap module\n\n**Approach:**\n1. Install better-sqlite3 and @types/better-sqlite3\n2. Create db/index.ts:\n   - Import Database from better-sqlite3\n   - `const DB_PATH = process.env.DB_PATH || './data/todo.db'`\n   - Ensure data directory exists (fs.mkdirSync with recursive)\n   - `const db = new Database(DB_PATH)`\n   - `db.pragma('foreign_keys = ON')`\n   - Export db instance and an `initSchema()` function (empty for now, will add tables in next task)\n3. Call initSchema() on module load or export for server startup\n\n**Tests:** Start API, verify `./data/todo.db` file is created; no errors on startup.\n\n**Acceptance:** better-sqlite3 installs without native module errors; DB file created in data/ directory; foreign_keys pragma is ON.",
-    "updatedAt": "2026-08-27T16:58:05.244Z"
+    "taskId": 6,
+    "content": "## Task: Define projects table schema and data-access functions\n\nDefine the projects table schema and typed CRUD data-access functions.\n\n**What/Why:** The epic requires projects with id, name, description, created_at. Data-access module provides typed functions for REST routes.\n\n**Files:**\n- `api/src/db/index.ts` — update initSchema() with CREATE TABLE IF NOT EXISTS\n- `api/src/db/projects.ts` — typed data-access functions\n- `api/src/types/project.ts` — Project interface\n\n**Approach:**\n1. Create types/project.ts: `interface Project { id: number; name: string; description: string | null; created_at: string; }`\n2. Update db/index.ts initSchema():\n   ```sql\n   CREATE TABLE IF NOT EXISTS projects (\n     id INTEGER PRIMARY KEY AUTOINCREMENT,\n     name TEXT NOT NULL,\n     description TEXT,\n     created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n   );\n   ```\n3. Create db/projects.ts with functions:\n   - `createProject(name: string, description?: string): Project`\n   - `listProjects(): (Project & { task_count: number })[]` — use subquery placeholder returning 0 until tasks table exists\n   - `getProject(id: number): Project | undefined`\n   - `updateProject(id: number, data: { name?: string; description?: string }): Project | undefined`\n   - `deleteProject(id: number): boolean`\n4. Use prepared statements for all queries\n\n**Tests:** Call each function manually via a test script or REPL; verify data round-trips.\n\n**Acceptance:** Projects table created; all 5 CRUD functions work and return typed results; schema is idempotent (restarts don't error).",
+    "updatedAt": "2026-08-27T17:03:59.053Z"
   },
   "feedback": {
-    "taskId": 5,
-    "content": "# QA Result\n\nReviewed task 5 (better-sqlite3 DB bootstrap) against the epic requirements and acceptance criteria.\n\n**Verified:**\n- `api/package.json`: `better-sqlite3@^12.11.1` + `@types/better-sqlite3@^9.6.0` added correctly, `@types/*` placed in `devDependencies` per repo convention.\n- `npm install` at root succeeds — no `EBADENGINE` warnings (correctly pinned to 12.x for Node 20.x support, per memory note).\n- `npm run build -w api` compiles cleanly with `tsc`.\n- `api/src/db/index.ts` — opens/creates SQLite file at `DB_PATH` (default `./data/todo.db`), creates parent dir via `fs.mkdirSync(..., {recursive: true})`, sets `db.pragma('foreign_keys = ON')`, exports `db` and an empty `initSchema()`, called on module load.\n- `api/src/index.ts` imports `./db/index.js` (side-effect import) before starting the server — correct ESM `.js` extension per existing convention.\n- Ran `PORT=3099 node dist/index.js`: server starts, `api/data/todo.db` file is created, `/api/health` still responds `{\"status\":\"ok\"}`.\n- Confirmed via a separate connection that `foreign_keys` pragma reads `1` (ON) on the created DB.\n- `api/data/todo.db` is correctly excluded from git via the existing `*.db` gitignore rule (`git check-ignore` confirms).\n- New `ralph/memory.md` entries (Node engine pin, `@types/*` dep placement, `DB_PATH` cwd-relative gotcha) are genuine non-obvious discoveries, consistent with existing entries — no duplicates.\n\nNo code changes made. Task meets all stated acceptance criteria.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-27T17:02:54.964Z"
+    "taskId": 6,
+    "content": "<status>verified</status>\n",
+    "updatedAt": "2026-08-27T17:05:48.191Z"
   },
-  "lastUpdated": "2026-08-27T17:02:54.965Z"
+  "lastUpdated": "2026-08-27T17:05:48.193Z"
 }
