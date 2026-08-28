@@ -319,10 +319,10 @@
       "id": 36,
       "title": "Add API integration tests for smart-list queries",
       "description": "**What/Why**: The epic's `api-tests` todo requires coverage for cross-project smart-list queries. GET /api/tasks endpoint has 3 query variants that need testing.\n\n**Files**: `api/src/routes/smart-lists.test.ts` (new, or extend `tasks.test.ts`)\n\n**Approach**: Seed 2 projects with tasks (some completed, some labeled) in `beforeEach`. Cover:\n- GET /api/tasks: returns all tasks with correct `project_name` and `labels` arrays\n- GET /api/tasks?completed=true: returns only completed tasks\n- GET /api/tasks?labelId=<valid>: returns only tasks with that label\n- GET /api/tasks?labelId=9999: 400 unknown label id\n- GET /api/tasks?labelId=abc: 400 malformed label id\n- Verify sort order matches spec (incomplete first, then title)\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 6+ tests covering all smart-list query variants; all green.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
+      "updatedAt": "2026-08-28T05:54:03.430Z"
     },
     {
       "id": 37,
@@ -379,18 +379,18 @@
       "updatedAt": "2026-08-28T05:45:44.659Z"
     }
   ],
-  "currentTaskNum": 35,
-  "totalLLMCalls": 47,
+  "currentTaskNum": 36,
+  "totalLLMCalls": 49,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 35,
-    "content": "## Task: Add API integration tests for labels and label assignment\n\n**What/Why**: The epic's `api-tests` todo requires tests for labels CRUD and label assignment to tasks, plus cascade behavior when a label is deleted.\n\n**Files**: `api/src/routes/labels.test.ts` (new)\n\n**Approach**: Same vitest+supertest pattern as tasks tests. Cover:\n- POST /api/labels: create with name only, create with color, 400 missing name\n- GET /api/labels: list all\n- GET /api/labels/:id: found, 404 not found\n- PUT /api/labels/:id: partial update name, partial update color, 400 empty name string, 404 not found\n- DELETE /api/labels/:id: success removes label, 404 already deleted\n- PUT /api/tasks/:id/labels: set labels, 400 non-existent label id leaves task unchanged, 400 non-array body, 404 unknown task\n- Deleting a label removes it from tasks' label arrays but tasks remain\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 12+ tests covering label CRUD, label assignment endpoint, and cascade behavior; all green.",
-    "updatedAt": "2026-08-28T05:48:52.266Z"
+    "taskId": 36,
+    "content": "## Task: Add API integration tests for smart-list queries\n\n**What/Why**: The epic's `api-tests` todo requires coverage for cross-project smart-list queries. GET /api/tasks endpoint has 3 query variants that need testing.\n\n**Files**: `api/src/routes/smart-lists.test.ts` (new, or extend `tasks.test.ts`)\n\n**Approach**: Seed 2 projects with tasks (some completed, some labeled) in `beforeEach`. Cover:\n- GET /api/tasks: returns all tasks with correct `project_name` and `labels` arrays\n- GET /api/tasks?completed=true: returns only completed tasks\n- GET /api/tasks?labelId=<valid>: returns only tasks with that label\n- GET /api/tasks?labelId=9999: 400 unknown label id\n- GET /api/tasks?labelId=abc: 400 malformed label id\n- Verify sort order matches spec (incomplete first, then title)\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 6+ tests covering all smart-list query variants; all green.",
+    "updatedAt": "2026-08-28T05:51:55.050Z"
   },
   "feedback": {
-    "taskId": 35,
-    "content": "<status>verified</status>\n",
-    "updatedAt": "2026-08-28T05:51:55.034Z"
+    "taskId": 36,
+    "content": "Task verified. Findings:\n\n- 9 tests in `api/src/routes/smart-lists.test.ts` cover all required scenarios: all tasks with `project_name`/`labels`, sort order (incomplete-first then title, verified via exact id sequence), completed-only filter (including empty case), label filter (single project + cross-project), and both 400 cases (`labelId=9999` unknown, `labelId=abc` malformed) — exceeds the 6+ minimum.\n- Every assertion (status codes, error message bodies, response shapes) matches the actual `api/src/routes/tasks.ts` source, not just the dev's memory claims.\n- `npm run build -w api` clean; `npm run test -w api` green across 3 repeated runs (58 tests, no flakiness) — confirms the existing `fileParallelism: false` fix already covers this 4th shared-DB test file.\n- Diff scoped to exactly the new test file plus routine `ralph/task-status.json`/`memory.md` bookkeeping; no production code changed (correct, since this task is test-only).\n\nNo new learnings worth adding to memory — this task matched the pattern already documented from the prior route-test tasks exactly, including the dev's own note being accurate.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T05:54:03.428Z"
   },
-  "lastUpdated": "2026-08-28T05:51:55.035Z"
+  "lastUpdated": "2026-08-28T05:54:03.430Z"
 }
