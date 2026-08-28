@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import App from './App';
 import { store } from './store';
@@ -12,6 +12,10 @@ vi.mock('./api/client', () => ({
   createProject: vi.fn(),
   updateProject: vi.fn(),
   deleteProject: vi.fn(),
+  fetchLabels: vi.fn().mockResolvedValue([]),
+  createLabel: vi.fn(),
+  updateLabel: vi.fn(),
+  deleteLabel: vi.fn(),
 }));
 
 afterEach(() => {
@@ -38,6 +42,20 @@ describe('App', () => {
     );
 
     expect(await screen.findByText('Project Todo Manager')).toBeInTheDocument();
+  });
+});
+
+describe('label management', () => {
+  it('reveals the label list after clicking Manage Labels', async () => {
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Manage Labels' }));
+
+    expect(await screen.findByText('No labels yet.')).toBeInTheDocument();
   });
 });
 

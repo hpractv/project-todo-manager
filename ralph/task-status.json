@@ -246,151 +246,133 @@
     {
       "id": 28,
       "title": "Labels management UI",
-      "description": "Add `web/src/features/labels/` with `LabelManager.tsx` (displays list of labels with colored swatches, edit/delete buttons), `LabelForm.tsx` (create/edit form with name input and color picker - use a simple `<input type='color'>`), and barrel `index.ts`. Wire into `App.tsx` with a 'Manage Labels' button that toggles visibility of `LabelManager`. Create/rename/recolor/delete all dispatch to `labelsSlice` thunks. Recolor changes persist immediately on color picker change. Delete shows inline confirm or uses existing `DeleteConfirmDialog` pattern. Files: `web/src/features/labels/LabelManager.tsx`, `web/src/features/labels/LabelForm.tsx`, `web/src/features/labels/index.ts` (all new), `web/src/App.tsx`. Tests: `npm run build -w web` clean; manual browser verification of CRUD flows. AC: create/rename/recolor/delete persist across reload; labels show colored swatches.",
-      "status": "backlog",
-      "devIterations": 0,
+      "description": "Build the labels management UI allowing users to create, rename, recolor, and delete labels.\n\n**What/Why:** The labelsSlice and API client exist but there's no UI to manage labels. Users need to create/edit/delete labels before they can assign them to tasks.\n\n**Files:**\n- `web/src/features/labels/LabelList.tsx` (new) — list all labels with colored indicators, Edit/Delete buttons per row\n- `web/src/features/labels/LabelForm.tsx` (new) — form with name input + color picker for create/edit modes\n- `web/src/features/labels/DeleteLabelDialog.tsx` (new) — confirm deletion dialog (mirrors DeleteConfirmDialog pattern)\n- `web/src/features/labels/index.ts` (new) — barrel export\n- `web/src/App.tsx` — add a 'Manage Labels' button/section that shows LabelList; wire form/dialog similar to project UI\n\n**Approach:** Mirror the ProjectList/ProjectForm/DeleteConfirmDialog pattern exactly. LabelForm needs a color input (simple text or `<input type='color'>`). fetchLabels on mount. Wire CRUD via labelsSlice thunks (already exist). Use try/catch + unwrap pattern for form submission.\n\n**Tests:** `npm run build -w web`, `npm run test -w web`. Manual verification: create label, rename, recolor, delete — each action persists after reload.\n\n**Acceptance:**\n- Labels list renders existing labels with name and colored indicator\n- Create form adds new label (with/without color)\n- Edit pre-populates and updates name/color\n- Delete confirms and removes label\n- All changes persist after page reload",
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:54:04.857Z"
     },
     {
       "id": 29,
-      "title": "Label picker on task form",
-      "description": "Modify `TaskForm.tsx` to include a label picker section: fetch labels on mount (via `useAppSelector(selectLabels)` + dispatch `fetchLabels` in parent or form), show available labels as checkboxes with colored indicators, track selected label IDs in local state, and on task save call `api.setTaskLabels(taskId, selectedIds)` after create/update succeeds. For edit mode, pre-populate selected labels from `task.labels`. Files: `web/src/features/tasks/TaskForm.tsx`. Tests: `npm run build -w web` clean; manual browser test: create task with labels -> reload -> labels persist; edit task labels -> save -> changes persist. AC: labels can be assigned/removed via the form; task's labels array in API response reflects changes.",
+      "title": "setTaskLabels thunk + label picker + chips",
+      "description": "Add the missing setTaskLabels thunk to tasksSlice, build a LabelPicker for TaskForm, and display colored label chips on TaskList rows.\n\n**What/Why:** The API client has `setTaskLabels(taskId, labelIds)` but tasksSlice has no thunk for it. Without this, users cannot assign labels to tasks from the UI. The Task type already has `labels?: Label[]` — need to display and edit it.\n\n**Files:**\n- `web/src/store/tasksSlice.ts` — add `setTaskLabels` async thunk calling `api.setTaskLabels(taskId, labelIds)`, update task in state on fulfilled\n- `web/src/features/tasks/LabelPicker.tsx` (new) — multi-select checkbox list of all labels; receives current `selectedIds: number[]` and `onChange: (ids: number[]) => void`\n- `web/src/features/tasks/TaskForm.tsx` — add LabelPicker below note field; track local `selectedLabelIds` state; on edit mode, init from `task.labels`; on submit, call `dispatch(setTaskLabels(taskId, selectedLabelIds))` after create/update\n- `web/src/features/tasks/TaskList.tsx` — render colored label chips (small colored badges) next to each task title; use `task.labels` array\n- `web/src/features/tasks/index.ts` — re-export LabelPicker if needed\n\n**Approach:** For create flow: create task first, then call setTaskLabels. For edit: call both updateTask and setTaskLabels. LabelPicker fetches labels via labelsSlice selector. Chips: `<span style={{ background: label.color || '#ccc', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75em' }}>{label.name}</span>`.\n\n**Tests:** `npm run build -w web`, `npm run test -w web`. Manual: create task + assign labels -> chips appear; edit task + add/remove labels -> persists; reload -> same labels shown.\n\n**Acceptance:**\n- TaskForm shows LabelPicker listing all available labels\n- Selecting labels on create/edit persists them to the task\n- TaskList rows show colored chips for each assigned label\n- Assigning multiple labels and removing one works correctly\n- Deleting a label from management UI removes it from all task chips",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 30,
-      "title": "Colored label chips on task rows",
-      "description": "Modify `TaskList.tsx` to display each task's labels as small colored chips (inline spans with background-color from `label.color`, fallback to gray if null). Chips appear after the task title/note, before the Edit/Delete buttons. Keep the styling minimal/inline for now (full Reminders styling comes in a later task). Files: `web/src/features/tasks/TaskList.tsx`. Tests: `npm run build -w web` clean; manual browser test: tasks with labels show colored chips; tasks without labels show no chips. AC: label chips render with correct colors; clicking chip does not trigger task selection or other actions.",
+      "title": "Filter/sort controls for tasks",
+      "description": "Implement task filtering by one or more labels (AND semantics) and sorting by label, title, and completion with deterministic tie-breaking.\n\n**What/Why:** Epic requires filtering tasks by labels (AND = task must have ALL selected labels) and sorting with documented tie-breaking (default: incomplete-first, then title).\n\n**Files:**\n- `web/src/store/tasksSlice.ts` — add `filterLabelIds: number[]` and `sortBy: 'title' | 'label' | 'completed'`, `sortDir: 'asc' | 'desc'` to state; add `setFilterLabels`, `setSort` reducers; add `selectFilteredSortedTasks` selector that applies filter (AND semantics) and sort logic\n- `web/src/features/tasks/FilterSortControls.tsx` (new) — dropdowns/checkboxes for selecting filter labels + sort key/direction\n- `web/src/features/tasks/TaskList.tsx` — use `selectFilteredSortedTasks` instead of `selectTasks`; render FilterSortControls above list\n- `web/src/features/tasks/index.ts` — export FilterSortControls\n\n**Approach:** Filter: `tasks.filter(t => filterLabelIds.every(fid => t.labels?.some(l => l.id === fid)))`. Sort: primary key per sortBy, tie-break with `completed` (false first), then `title` (localeCompare). Document in a comment: 'Tie-breaking: incomplete first, then title alphabetically'.\n\n**Tests:** `npm run build -w web`, `npm run test -w web`. Add unit tests in `tasksSlice.test.ts` for filter/sort selector logic. Manual: assign labels -> filter by 1 label shows subset; filter by 2 labels shows AND intersection; sort toggles update order; clearing filter restores full list.\n\n**Acceptance:**\n- Filter by one label shows only tasks with that label\n- Filter by multiple labels shows only tasks with ALL of them (AND)\n- Clearing filter restores full list\n- Each sort option (title/label/completed) is deterministic\n- Tie-breaking is documented and consistent",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 31,
-      "title": "Task filter and sort controls",
-      "description": "Add filter/sort UI to `TaskList.tsx` (or a new `TaskFilters.tsx` component): multi-select dropdown for labels (AND semantics - task must have ALL selected labels), sort dropdown with options [title asc, title desc, completed first, incomplete first, label name]. Apply filtering/sorting client-side in the selector or component (not API). Document tie-breaking: incomplete-first is primary for completion sort, then title alphabetically. For label sort, sort by first label's name or 'zzz' if no labels, then title. Export the filter/sort logic as testable pure functions. Files: `web/src/features/tasks/TaskList.tsx` or new `TaskFilters.tsx`, optionally a `web/src/utils/taskSort.ts` for logic. Tests: `npm run build -w web` clean; add unit tests for filter/sort functions. AC: filtering by multiple labels shows only tasks with ALL selected labels; each sort option is deterministic and documented.",
+      "title": "Smart lists API endpoints",
+      "description": "Add API support for cross-project task queries: all tasks, completed tasks, and tasks by label — each including the project name.\n\n**What/Why:** Epic requires cross-project smart lists (All, Completed, per-label) that show tasks from all projects with project name per row. Need API endpoints first.\n\n**Files:**\n- `api/src/db/tasks.ts` — add `listAllTasks()`, `listCompletedTasks()`, `listTasksByLabel(labelId: number)` functions; each returns `Task & { project_name: string }` via JOIN with projects\n- `api/src/types/task.ts` — add `TaskWithProject` type extending Task with `project_name: string`\n- `api/src/routes/tasks.ts` — add `GET /tasks` (all), `GET /tasks?completed=true` (completed only), `GET /tasks?label_id=X` (by label); all return TaskWithProject[] including labels via withLabels\n- `web/src/api/types.ts` — add `TaskWithProject` type\n- `web/src/api/client.ts` — add `fetchAllTasks()`, `fetchCompletedTasks()`, `fetchTasksByLabel(labelId)` functions\n\n**Approach:** SQL: `SELECT tasks.*, projects.name AS project_name FROM tasks JOIN projects ON tasks.project_id = projects.id`. For label filter: add `JOIN task_labels ON ... WHERE task_labels.label_id = ?`. For completed: `WHERE tasks.completed = 1`. Route can use query params to switch modes.\n\n**Tests:** `npm run build -w api`, `npm run test -w api`. Manual curl: create tasks in multiple projects -> GET /api/tasks returns all with project_name; add completed filter; add label filter.\n\n**Acceptance:**\n- GET /api/tasks returns all tasks across projects, each with project_name\n- GET /api/tasks?completed=true returns only completed tasks\n- GET /api/tasks?label_id=X returns tasks with that label across projects\n- All responses include labels array via withLabels\n- 404 for unknown label_id",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 32,
-      "title": "Smart lists API endpoints",
-      "description": "Add cross-project query endpoints: `GET /api/tasks` (all tasks across all projects, each with `project_name` field), `GET /api/tasks?completed=true` (completed tasks only), `GET /api/tasks?label=:id` (tasks with that label). Extend `api/src/db/tasks.ts` with `listAllTasks()`, `listCompletedTasks()`, `listTasksByLabel(labelId)` - each returns tasks with `project_name` via JOIN on projects table. Include labels array in each task response. Modify `api/src/routes/tasks.ts` to handle these routes (distinguish from project-scoped routes by path). Files: `api/src/db/tasks.ts`, `api/src/routes/tasks.ts`. Tests: `npm run build -w api` clean; existing tests green; manual curl verification. AC: all three query patterns return correct task sets with project_name; labels included.",
+      "title": "Smart lists web slice + thunks",
+      "description": "Add web-side state and thunks for fetching cross-project smart list data.\n\n**What/Why:** Need to wire the new smart-list API endpoints into Redux so the UI can fetch/display them.\n\n**Files:**\n- `web/src/store/tasksSlice.ts` — add `smartListMode: 'project' | 'all' | 'completed' | { labelId: number } | null` state; add `fetchAllTasks`, `fetchCompletedTasks`, `fetchTasksByLabel` thunks; fulfilled cases set `tasks` plus `smartListMode`; selectors for current mode\n- OR create separate `web/src/store/smartListsSlice.ts` if state is cleaner to isolate (tradeoff: need to ensure same filter/sort logic applies)\n\n**Approach:** Keep it in tasksSlice to reuse filter/sort selectors. Add `selectSmartListMode` selector. `selectFilteredSortedTasks` already works on `state.tasks.tasks` regardless of source.\n\n**Tests:** `npm run build -w web`, `npm run test -w web`. Add tests for the new thunks in `tasksSlice.test.ts`.\n\n**Acceptance:**\n- `fetchAllTasks` thunk populates tasks from all projects\n- `fetchCompletedTasks` thunk populates only completed tasks\n- `fetchTasksByLabel(labelId)` thunk populates tasks with that label\n- Filter/sort selectors work on smart list data\n- `smartListMode` state reflects current view",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 33,
-      "title": "Smart lists UI",
-      "description": "Add `web/src/features/smartlists/SmartLists.tsx` displaying fixed smart list entries (All, Completed) plus one entry per label. Clicking a smart list sets a `selectedSmartList` state (new in App.tsx or a dedicated slice) and clears `selectedProject`. When a smart list is active, the main pane calls the appropriate API endpoint (fetchAllTasks, fetchCompletedTasks, fetchTasksByLabel) and renders results with project name shown per row. Reuse `TaskList` component or create a variant. Smart lists honor the same filter/sort controls from task 31. Add web API client methods for the three new endpoints. Files: `web/src/api/client.ts`, `web/src/features/smartlists/SmartLists.tsx` (new), `web/src/App.tsx`. Tests: `npm run build -w web` clean; manual browser test of all smart list types. AC: All shows every task; Completed shows only completed; label smart list shows that label's tasks; project name visible per row.",
+      "title": "Smart lists sidebar UI",
+      "description": "Add smart lists in the sidebar (All, Completed, one per label) that render cross-project tasks in the main pane.\n\n**What/Why:** Epic requires smart lists section above projects in the sidebar. Selecting one shows tasks from all projects with project name per row.\n\n**Files:**\n- `web/src/features/smartlists/SmartLists.tsx` (new) — render 'All', 'Completed', then one entry per label from labelsSlice; onClick dispatches appropriate fetch thunk and sets smartListMode\n- `web/src/features/smartlists/index.ts` (new) — barrel\n- `web/src/App.tsx` — integrate SmartLists above ProjectList in sidebar area; conditionally render TaskList vs SmartTaskList based on smartListMode\n- `web/src/features/tasks/TaskList.tsx` OR new `SmartTaskList.tsx` — when in smart list mode, show `project_name` per task row; filter/sort controls still apply\n\n**Approach:** SmartLists fetches labels on mount. Selecting 'All' dispatches fetchAllTasks. TaskList checks smartListMode: if not 'project', render project name badge per row. Share same filter/sort UI.\n\n**Tests:** `npm run build -w web`, `npm run test -w web`. Manual: click All -> see tasks from multiple projects with project name; click Completed -> only completed; click a label -> only those with that label; filter/sort work the same.\n\n**Acceptance:**\n- Sidebar shows All, Completed, and one entry per label\n- Clicking 'All' shows all tasks from all projects with project name per row\n- Clicking 'Completed' shows only completed tasks cross-project\n- Clicking a label smart list shows tasks with that label\n- Filter/sort controls work identically in smart lists",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 34,
       "title": "Two-pane Reminders layout",
-      "description": "Refactor `App.tsx` into a two-pane layout: left sidebar containing SmartLists (All, Completed, per-label) + Projects list with colored icons/dots, right main pane showing tasks for the selected sidebar entry. Create `web/src/features/layout/Sidebar.tsx` to encapsulate the sidebar. Selecting any sidebar entry (smart list or project) updates the main pane. Use CSS Flexbox or Grid for the layout. Sidebar width ~250px fixed, main pane fills remaining space. Project rows in sidebar show colored dot/icon (use a hardcoded palette or project index mod colors for now). Files: `web/src/features/layout/Sidebar.tsx` (new), `web/src/App.tsx`. Tests: `npm run build -w web` clean; manual browser test of layout and selection behavior. AC: sidebar and main pane render side-by-side; selecting switches main pane content; layout is responsive-ish (main pane shrinks, sidebar stays fixed).",
+      "description": "Implement the two-pane layout with a left sidebar (smart lists + projects) and a main task pane, replacing the current flat App layout.\n\n**What/Why:** Epic requires Apple Reminders-style two-pane layout. Currently App.tsx has a flat flexbox layout. Need proper sidebar + main pane structure.\n\n**Files:**\n- `web/src/features/layout/Sidebar.tsx` (new) — contains SmartLists section + Projects section (ProjectList) with colored icons/dots; handles selection state\n- `web/src/features/layout/MainPane.tsx` (new) — renders current view content (task list or empty state based on selection)\n- `web/src/features/layout/index.ts` (new) — barrel\n- `web/src/App.tsx` — refactor to `<div className='app-layout'><Sidebar /><MainPane /></div>` structure; move modal dialogs here\n- `web/src/styles/layout.css` (new) — `.app-layout { display: flex; height: 100vh; } .sidebar { width: 280px; ... } .main-pane { flex: 1; ... }`\n\n**Approach:** Sidebar owns smart list + project list rendering. MainPane reads selection state and renders appropriate task view. Keep form/delete dialogs at App level.\n\n**Tests:** `npm run build -w web`, `npm run test -w web`. Manual: verify sidebar on left, main pane on right; selecting items updates main pane; dialogs still work.\n\n**Acceptance:**\n- Left sidebar contains smart lists section above projects section\n- Projects show colored icons/dots\n- Main pane fills remaining width\n- Selecting sidebar item updates main pane content\n- Layout is responsive-ish (sidebar fixed width, main pane flexible)",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 35,
-      "title": "Reminders-style task row visuals",
-      "description": "Style task rows in the Apple Reminders idiom: circular checkbox (custom-rendered, not native), title in system font, optional note in smaller gray text below, colored label chips, subtle dividers between rows. Use CSS modules (`web/src/features/tasks/TaskList.module.css`) or inline styles with CSS variables. Checkbox shows empty circle when incomplete, filled circle with checkmark when complete. Do NOT copy proprietary Apple assets - use generic icons or CSS-only checkmark. Files: `web/src/features/tasks/TaskList.tsx`, `web/src/features/tasks/TaskList.module.css` (new if using CSS modules). Tests: `npm run build -w web` clean; manual browser visual inspection. AC: task rows match the Reminders idiom description; checkbox visually distinct for complete/incomplete; no layout regression.",
+      "title": "Reminders visual styling",
+      "description": "Style task rows in the Apple Reminders idiom: circular checkbox, title/note layout, colored label chips, subtle dividers, system font.\n\n**What/Why:** Epic requires Reminders-style visual treatment without copying proprietary assets.\n\n**Files:**\n- `web/src/features/tasks/TaskList.tsx` — apply CSS classes/modules for row styling\n- `web/src/features/tasks/TaskRow.tsx` (new, optional) — extract row markup for cleaner styling\n- `web/src/styles/tasks.css` or `web/src/features/tasks/TaskList.module.css` (new) — circular checkbox (border-radius: 50%, custom appearance), title/note vertical stack, chip styles, subtle dividers (border-bottom or hr), system font stack\n\n**Approach:** Use CSS: checkbox with `appearance: none` + custom border/check icon. Title as primary, note as secondary muted text. Chips inline after title. Dividers: `border-bottom: 1px solid var(--divider-color)` on each row. Font: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`.\n\n**Tests:** `npm run build -w web`, visual inspection. No automated style tests needed.\n\n**Acceptance:**\n- Task checkbox is circular (not square)\n- Title is primary text, note is smaller/muted below\n- Label chips are inline with color backgrounds\n- Rows have subtle dividers between them\n- Font is system font stack",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 36,
-      "title": "Light and dark theme with persistence",
-      "description": "Add theme support with CSS variables defined in `web/src/styles/theme.css` (or `index.css`): `--bg-primary`, `--bg-secondary`, `--text-primary`, `--text-secondary`, `--border`, `--accent`. Define both `:root` (light) and `[data-theme='dark']` variants. Add a theme toggle button in the header/sidebar that toggles `data-theme` attribute on `<html>`. Persist choice in localStorage (`theme` key); restore on load in `main.tsx` or a `useEffect` in `App.tsx`. Files: `web/src/styles/theme.css` (new), `web/src/main.tsx` or `web/src/App.tsx`, `web/index.html` (add stylesheet link if needed). Tests: `npm run build -w web` clean; manual browser test: toggle switches colors; reload restores choice. AC: light and dark themes visually distinct; toggle works; choice persists.",
+      "title": "Light/dark theme with toggle",
+      "description": "Add light and dark themes with a toggle; persist the choice and restore it on load.\n\n**What/Why:** Epic requires theme toggle with persistence.\n\n**Files:**\n- `web/src/styles/theme.css` (new) — CSS custom properties for light theme (:root) and dark theme ([data-theme='dark']): background, text, divider, accent colors\n- `web/src/App.tsx` or `web/src/features/layout/ThemeToggle.tsx` (new) — toggle button; onClick toggles theme; reads/writes localStorage or calls settings API\n- `web/src/main.tsx` — on mount, read persisted theme and apply `data-theme` attribute to document root\n\n**Approach:** Use CSS custom properties: `--bg-primary, --text-primary, --divider, --accent`. Toggle sets `document.documentElement.dataset.theme = 'dark' | 'light'`. Persist to localStorage('theme'). On load, check localStorage before render.\n\n**Tests:** `npm run build -w web`. Manual: toggle -> colors change immediately; reload -> same theme persists.\n\n**Acceptance:**\n- Toggle switches between light and dark themes immediately\n- Theme choice persists after page reload\n- All UI elements respect theme variables (sidebar, main pane, dialogs)",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 37,
       "title": "Interaction animations",
-      "description": "Add CSS transitions/animations: 1) Check-off completion - checkbox fill animates, completed task row fades/grays slightly with transition. 2) Hover/active states on all interactive elements (buttons, checkboxes, list rows). 3) Smooth add/remove row animations for tasks - use CSS `@keyframes` for fade-in on mount, fade-out on delete (may require brief delay before actual removal or `onAnimationEnd` callback). Keep animations subtle (200-300ms, ease-out). Files: task list CSS (from task 35), button/form styles. Tests: `npm run build -w web` clean; manual browser visual inspection of all animations. AC: check-off has visible transition; hover states on interactive elements; rows animate in/out (or at minimum, fade in on mount).",
+      "description": "Add check-off completion transitions, hover/active states, and smooth add/remove row animations for tasks.\n\n**What/Why:** Epic requires polish via animations for completion, hover states, and row add/remove.\n\n**Files:**\n- `web/src/styles/animations.css` (new) — keyframes for fade-in, slide-out, check transition\n- `web/src/features/tasks/TaskList.tsx` or `TaskRow.tsx` — apply animation classes; possibly use React TransitionGroup or simple CSS\n- `web/src/styles/tasks.css` — add :hover, :active states for interactive elements (checkboxes, buttons, rows)\n\n**Approach:** Completion: checkbox fill animation (background-color transition 150ms). Hover: subtle background highlight on row. Add row: fade-in animation. Remove row: slide-out or fade-out (if using TransitionGroup, add react-transition-group; if not, just instant removal is acceptable). Keep it simple — CSS transitions preferred over heavy animation libraries.\n\n**Tests:** `npm run build -w web`. Manual/visual: check a task -> smooth fill; hover rows -> highlight; add/delete -> smooth appearance/removal.\n\n**Acceptance:**\n- Checking/unchecking a task has a smooth transition\n- Rows have hover highlight states\n- Adding a task has entry animation (fade-in)\n- Removing a task animates out (or at minimum, is not jarring)",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 38,
-      "title": "API tests for tasks CRUD",
-      "description": "Add `api/src/routes/tasks.test.ts` with integration tests covering: create task (201), create with missing title (400), list tasks by project, list for unknown project (404), get task by id, get unknown task (404), update task (title/note/completed), update unknown task (404), update with invalid completed type (400), delete task, delete unknown task (404), completion persistence across restart, project delete cascades to tasks. Follow `projects.test.ts` pattern: use scratch `DB_PATH` via vitest config, truncate tables in `beforeEach`, close+remove DB in `afterAll`. Files: `api/src/routes/tasks.test.ts` (new). Tests: `npm run test -w api` runs all task tests green alongside existing project tests. AC: all happy paths + error paths covered; cascade verified.",
+      "title": "API integration tests for tasks and labels",
+      "description": "Add API tests for tasks, labels, label assignment, smart-list queries, and cascade behavior.\n\n**What/Why:** Epic requires comprehensive API tests covering happy paths, validation (400), not-found (404), completion persistence, label-removal, and project-delete cascade.\n\n**Files:**\n- `api/src/routes/tasks.test.ts` (new) — test all task endpoints: create (201), create missing title (400), list by project, list unknown project (404), get found/not-found, update partial, update bad title (400), update bad completed (400), toggle complete persists, delete, delete again (404)\n- `api/src/routes/labels.test.ts` (new) — test label CRUD: create with/without color, list, get, update partial, update empty name (400), delete, delete removes from task_labels but not tasks\n- `api/src/routes/smart-lists.test.ts` OR extend tasks.test.ts — test GET /api/tasks (all), ?completed=true, ?label_id=X, unknown label_id (404)\n- Add cascade tests: delete project -> its tasks gone; delete label -> task_labels rows gone but tasks intact\n\n**Approach:** Use existing projects.test.ts pattern (supertest + vitest + in-memory test DB). beforeEach: truncate projects, tasks, labels, task_labels. Seed data as needed per test.\n\n**Tests:** `npm run test -w api` — all new tests pass.\n\n**Acceptance:**\n- Tasks CRUD tests: create, read, update, delete, validation, 404s\n- Labels CRUD tests: create, read, update, delete, validation, 404s\n- Label assignment tests: assign, re-assign, clear, 400 for bad label_id\n- Smart-list tests: all, completed, by-label, project_name included\n- Cascade tests: project delete cascades to tasks; label delete cascades to task_labels only",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 39,
-      "title": "API tests for labels and assignment",
-      "description": "Add `api/src/routes/labels.test.ts` with integration tests covering: create label with/without color, list labels, get label, update label (partial), update unknown (404), delete label, delete unknown (404), assign label to task, assign to unknown task/label (404), remove label from task, list labels for task, delete label removes join rows but not tasks, delete task removes join rows. Also test the `GET /api/tasks/:id` includes labels array. Files: `api/src/routes/labels.test.ts` (new). Tests: `npm run test -w api` runs all labels tests green. AC: CRUD + assignment + cascade tests pass.",
+      "title": "Web tests for slices and components",
+      "description": "Add web tests for tasksSlice (including setTaskLabels), labelsSlice, filtering/sorting logic, smart-list selection, task toggle, and label assignment components.\n\n**What/Why:** Epic requires comprehensive web tests. Existing tests cover basic slice behavior but not the new features.\n\n**Files:**\n- `web/src/store/tasksSlice.test.ts` — add tests for setTaskLabels thunk, filter selector (AND semantics), sort selector with tie-breaking, smart-list thunks\n- `web/src/store/labelsSlice.test.ts` — already has basic tests; ensure coverage for error cases\n- `web/src/features/tasks/FilterSortControls.test.tsx` (new) — test filter/sort UI interactions\n- `web/src/features/tasks/LabelPicker.test.tsx` (new) — test multi-select behavior\n- `web/src/features/smartlists/SmartLists.test.tsx` (new) — test selection dispatches correct thunk\n\n**Approach:** Use Vitest + Testing Library + mocked API client (existing pattern). Test selector logic with plain state objects. Test components with render + fireEvent.\n\n**Tests:** `npm run test -w web` — all new tests pass.\n\n**Acceptance:**\n- setTaskLabels thunk tests: fulfilled updates task's labels\n- Filter selector tests: empty filter returns all; single label filter; multi-label AND filter\n- Sort selector tests: each sort key; tie-breaking documented\n- Component tests: LabelPicker selection, FilterSortControls state changes, SmartLists selection",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     },
     {
       "id": 40,
-      "title": "Web tests for labelsSlice",
-      "description": "Add `web/src/store/labelsSlice.test.ts` following `tasksSlice.test.ts` pattern: mock `../api/client`, test initial state shape, fetchLabels fulfilled/rejected, createLabel fulfilled, updateLabel fulfilled, deleteLabel fulfilled. At least 6 tests. Files: `web/src/store/labelsSlice.test.ts` (new). Tests: `npm run test -w web` runs labelsSlice tests green. AC: slice behavior verified including error handling.",
+      "title": "Single-command test suite",
+      "description": "Ensure a single documented command runs the full api + web suite green with no network access, and record run/build instructions in the README.\n\n**What/Why:** Epic requires one command to run all tests. Currently `npm run test` at root should work but needs verification and documentation.\n\n**Files:**\n- `package.json` (root) — verify `\"test\": \"npm run test -w api && npm run test -w web\"` or `concurrently` equivalent\n- `README.md` — add Testing section documenting: `npm run test` runs all tests; note that tests use an isolated test DB and no network\n\n**Approach:** Run `npm run test` at root, verify both api and web suites execute. Confirm no network calls (tests mock API client / use in-memory DB). Add README section.\n\n**Tests:** `npm run test` — all tests pass in one command.\n\n**Acceptance:**\n- `npm run test` at repo root runs api and web test suites\n- All tests pass (no failures)\n- No network access required (mocked/in-memory)\n- README documents the test command and explains isolation",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
-    },
-    {
-      "id": 41,
-      "title": "Web tests for filter/sort logic",
-      "description": "Add tests for the filter/sort pure functions from task 31: filter by single label, filter by multiple labels (AND), filter with no matching tasks, sort by title asc/desc, sort by completion, sort by label name, tie-breaking behavior. These should be unit tests on the exported functions, not component tests. Files: wherever the filter/sort logic lives (e.g., `web/src/utils/taskSort.test.ts` or inline in component test file). Tests: `npm run test -w web` runs filter/sort tests green. AC: all filter/sort behaviors have test coverage with deterministic assertions.",
-      "status": "backlog",
-      "devIterations": 0,
-      "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
-    },
-    {
-      "id": 42,
-      "title": "Single-command test suite verification",
-      "description": "Verify and document that `npm test` at repo root runs both api and web test suites green with no network access. Ensure all tests are deterministic (no flaky ordering). Run the full suite 3 times to confirm stability. Update README.md with the test command and any prerequisites (none expected - tests use in-memory/scratch DBs). If any test requires network, fix it to use mocks. Files: `README.md` (update Testing section). Tests: `npm test` from repo root, 3 consecutive runs, all green. AC: documented command runs full suite; no failures; no network calls.",
-      "status": "backlog",
-      "devIterations": 0,
-      "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:46:02.846Z"
     }
   ],
-  "currentTaskNum": 27,
-  "totalLLMCalls": 26,
+  "currentTaskNum": 28,
+  "totalLLMCalls": 29,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 27,
-    "content": "## Task: Labels Redux slice\n\nAdd `web/src/store/labelsSlice.ts` following `projectsSlice.ts` pattern: state `{ labels: Label[], loading, error }`, async thunks `fetchLabels`, `createLabel`, `updateLabel`, `deleteLabel`. Export selectors `selectLabels`, `selectLabelsLoading`, `selectLabelsError`. Register reducer in `web/src/store/index.ts`. Do NOT add `setTaskLabels` thunk here (it will update the task, not labels state). Files: `web/src/store/labelsSlice.ts` (new), `web/src/store/index.ts`. Tests: `npm run build -w web` clean; add `web/src/store/labelsSlice.test.ts` with at least 5 tests (initial state, fetchLabels fulfilled/rejected, createLabel fulfilled, deleteLabel fulfilled). AC: slice shape matches other slices; selectors typed correctly; tests pass.",
-    "updatedAt": "2026-08-28T04:39:52.981Z"
+    "taskId": 28,
+    "content": "## Task: Labels management UI\n\nBuild the labels management UI allowing users to create, rename, recolor, and delete labels.\n\n**What/Why:** The labelsSlice and API client exist but there's no UI to manage labels. Users need to create/edit/delete labels before they can assign them to tasks.\n\n**Files:**\n- `web/src/features/labels/LabelList.tsx` (new) — list all labels with colored indicators, Edit/Delete buttons per row\n- `web/src/features/labels/LabelForm.tsx` (new) — form with name input + color picker for create/edit modes\n- `web/src/features/labels/DeleteLabelDialog.tsx` (new) — confirm deletion dialog (mirrors DeleteConfirmDialog pattern)\n- `web/src/features/labels/index.ts` (new) — barrel export\n- `web/src/App.tsx` — add a 'Manage Labels' button/section that shows LabelList; wire form/dialog similar to project UI\n\n**Approach:** Mirror the ProjectList/ProjectForm/DeleteConfirmDialog pattern exactly. LabelForm needs a color input (simple text or `<input type='color'>`). fetchLabels on mount. Wire CRUD via labelsSlice thunks (already exist). Use try/catch + unwrap pattern for form submission.\n\n**Tests:** `npm run build -w web`, `npm run test -w web`. Manual verification: create label, rename, recolor, delete — each action persists after reload.\n\n**Acceptance:**\n- Labels list renders existing labels with name and colored indicator\n- Create form adds new label (with/without color)\n- Edit pre-populates and updates name/color\n- Delete confirms and removes label\n- All changes persist after page reload",
+    "updatedAt": "2026-08-28T04:46:02.856Z"
   },
   "feedback": {
-    "taskId": 27,
-    "content": "Memory already has a matching entry from the dev pass, no need to duplicate. This task is verified.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T04:42:44.153Z"
+    "taskId": 28,
+    "content": "The Labels management UI task is complete and verified:\n\n- `web/src/features/labels/{LabelList,LabelForm,DeleteLabelDialog,index}` mirror the existing Project/Task feature patterns exactly, wired into `App.tsx` behind a \"Manage Labels\" toggle.\n- `npm run build -w web` clean; `npm run test -w web` (17 tests) and `npm run test -w api` (13 tests) all pass.\n- Independently drove the real UI against a live dev API/SQLite via a headless browser: create-without-color, create-with-color, reload-persists-both, rename+recolor, reload-persists-the-recolor (verified via computed swatch background), delete, and reload-confirms-removal — all 8 checks passed.\n\nAll acceptance criteria are met.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T04:54:04.855Z"
   },
-  "lastUpdated": "2026-08-28T04:42:44.155Z"
+  "lastUpdated": "2026-08-28T04:54:04.857Z"
 }

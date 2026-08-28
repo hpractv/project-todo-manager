@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { DeleteConfirmDialog, ProjectForm, ProjectList } from './features/projects';
 import { DeleteTaskDialog, TaskForm, TaskList } from './features/tasks';
+import { DeleteLabelDialog, LabelForm, LabelList } from './features/labels';
 import { useAppSelector } from './store/hooks';
 import { selectSelectedProject } from './store/projectsSlice';
-import type { ProjectWithTaskCount, Task } from './api/types';
+import type { Label, ProjectWithTaskCount, Task } from './api/types';
 
 function App() {
   const [showForm, setShowForm] = useState(false);
@@ -14,6 +15,11 @@ function App() {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
+
+  const [showLabelManager, setShowLabelManager] = useState(false);
+  const [showLabelForm, setShowLabelForm] = useState(false);
+  const [editingLabel, setEditingLabel] = useState<Label | null>(null);
+  const [deletingLabel, setDeletingLabel] = useState<Label | null>(null);
 
   useEffect(() => {
     setShowTaskForm(false);
@@ -31,9 +37,34 @@ function App() {
     setEditingTask(null);
   }
 
+  function handleCloseLabelForm() {
+    setShowLabelForm(false);
+    setEditingLabel(null);
+  }
+
   return (
     <div>
       <h1>Project Todo Manager</h1>
+      <div>
+        <button type="button" onClick={() => setShowLabelManager((current) => !current)}>
+          {showLabelManager ? 'Hide Labels' : 'Manage Labels'}
+        </button>
+        {showLabelManager && (
+          <div>
+            <button type="button" onClick={() => setShowLabelForm(true)}>
+              New Label
+            </button>
+            {(showLabelForm || editingLabel) && (
+              <LabelForm
+                key={editingLabel?.id ?? 'new'}
+                label={editingLabel ?? undefined}
+                onClose={handleCloseLabelForm}
+              />
+            )}
+            <LabelList onEdit={setEditingLabel} onDelete={setDeletingLabel} />
+          </div>
+        )}
+      </div>
       <div style={{ display: 'flex', gap: '2rem' }}>
         <div>
           <button type="button" onClick={() => setShowForm(true)}>
@@ -76,6 +107,9 @@ function App() {
       )}
       {deletingTask && (
         <DeleteTaskDialog task={deletingTask} onClose={() => setDeletingTask(null)} />
+      )}
+      {deletingLabel && (
+        <DeleteLabelDialog label={deletingLabel} onClose={() => setDeletingLabel(null)} />
       )}
     </div>
   );
