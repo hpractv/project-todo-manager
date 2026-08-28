@@ -175,10 +175,10 @@
       "id": 20,
       "title": "Add Task types and API client methods to web",
       "description": "What/Why: The web app needs to call the tasks API endpoints. No task types or client methods exist yet.\n\nFiles: `web/src/api/types.ts`, `web/src/api/client.ts`.\n\nApproach:\n- In `types.ts`: Add `Task` interface (id, project_id, title, note: string|null, completed: boolean, sort_order, created_at, updated_at) and `TaskInput` (title required, note optional).\n- In `client.ts`: Add functions `fetchTasks(projectId)`, `createTask(projectId, data)`, `updateTask(id, data)`, `deleteTask(id)` following the existing project client pattern.\n\nTests: `npm run build -w web` must compile cleanly. Manual: call each client method from a scratch script or browser console against a running API.\n\nAcceptance: Types match API response shapes; all 4 client methods correctly call the API and return typed data; build passes.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T03:57:45.692Z"
+      "updatedAt": "2026-08-28T04:03:53.464Z"
     },
     {
       "id": 21,
@@ -370,18 +370,18 @@
       "updatedAt": "2026-08-28T03:57:45.692Z"
     }
   ],
-  "currentTaskNum": 19,
-  "totalLLMCalls": 8,
+  "currentTaskNum": 20,
+  "totalLLMCalls": 10,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 19,
-    "content": "## Task: Update listProjects to compute real task_count\n\nWhat/Why: The epic requires live task counts per project; currently `api/src/db/projects.ts` line 13 hardcodes `0 AS task_count`. Replace with a LEFT JOIN/subquery on the tasks table to count tasks where `tasks.project_id = projects.id`.\n\nFiles: `api/src/db/projects.ts` (selectAllWithTaskCountStmt).\n\nApproach: Change the prepared statement SQL from `SELECT id, name, description, created_at, 0 AS task_count FROM projects ORDER BY id` to use `LEFT JOIN tasks ON tasks.project_id = projects.id` with `COUNT(tasks.id) AS task_count` and `GROUP BY projects.id`. Keep the ordering by `id`.\n\nTests: Run `npm run test -w api` (existing 13 tests still green). Manual verification: start API with scratch DB, create a project, add 2 tasks to it via the tasks endpoints, then GET /api/projects — the task_count should be 2. Delete a task, confirm count decrements to 1.\n\nAcceptance: GET /api/projects returns correct task_count reflecting actual number of tasks; count updates after task create/delete; existing projects tests pass.",
-    "updatedAt": "2026-08-28T03:57:45.697Z"
+    "taskId": 20,
+    "content": "## Task: Add Task types and API client methods to web\n\nWhat/Why: The web app needs to call the tasks API endpoints. No task types or client methods exist yet.\n\nFiles: `web/src/api/types.ts`, `web/src/api/client.ts`.\n\nApproach:\n- In `types.ts`: Add `Task` interface (id, project_id, title, note: string|null, completed: boolean, sort_order, created_at, updated_at) and `TaskInput` (title required, note optional).\n- In `client.ts`: Add functions `fetchTasks(projectId)`, `createTask(projectId, data)`, `updateTask(id, data)`, `deleteTask(id)` following the existing project client pattern.\n\nTests: `npm run build -w web` must compile cleanly. Manual: call each client method from a scratch script or browser console against a running API.\n\nAcceptance: Types match API response shapes; all 4 client methods correctly call the API and return typed data; build passes.",
+    "updatedAt": "2026-08-28T04:01:56.796Z"
   },
   "feedback": {
-    "taskId": 19,
-    "content": "The diff is scoped correctly — only `api/src/db/projects.ts` changed for the actual code, matching the task's stated file list. Memory already contains dev notes for this exact task (Task 19), and my independent verification matches those notes exactly.\n\nSummary of verification:\n- `npm run build -w api` — clean, no type errors\n- `npm run test -w api` — 13 existing tests pass, unaffected\n- Manual verification against a scratch DB: created a project, added 2 tasks → `task_count: 2`; deleted 1 task → `task_count: 1`; a separate project with 0 tasks correctly returns `task_count: 0` (not null, confirming `COUNT(tasks.id)` correctly skips the NULL from the LEFT JOIN rather than `COUNT(*)` miscounting it as 1)\n- `ORDER BY projects.id` preserved as required\n- No stray processes or scratch files left behind\n\nAll acceptance criteria are met.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T04:01:56.779Z"
+    "taskId": 20,
+    "content": "# QA Result\n\nTask 20 is complete and correct.\n\n- `web/src/api/types.ts`: `Task` and `TaskInput` match the API's actual response/request shapes exactly (mirrors `api/src/types/task.ts`).\n- `web/src/api/client.ts`: `fetchTasks`, `createTask`, `updateTask`, `deleteTask` follow the existing `request<T>` pattern from the project client functions; `updateTask`'s partial-update typing correctly reflects the tasks route's true partial-PUT semantics (title/note/completed all optional).\n- `npm run build -w web` — clean, no type errors.\n- `npm run test -w web` (3 tests) and `npm run test -w api` (13 tests) — both green, unaffected.\n- Diff is scoped to exactly the two files named in the task; no stray changes.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T04:03:53.462Z"
   },
-  "lastUpdated": "2026-08-28T04:01:56.781Z"
+  "lastUpdated": "2026-08-28T04:03:53.464Z"
 }

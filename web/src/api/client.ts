@@ -1,4 +1,4 @@
-import type { Project, ProjectInput, ProjectWithTaskCount } from './types';
+import type { Project, ProjectInput, ProjectWithTaskCount, Task, TaskInput } from './types';
 
 // Empty default uses same-origin `/api` paths so the Vite dev-server proxy
 // forwards them. That avoids CORS failures when Vite is not on port 5173.
@@ -60,6 +60,33 @@ export function updateProject(id: number, data: ProjectInput): Promise<Project> 
 
 export function deleteProject(id: number): Promise<void> {
   return request<void>(`/api/projects/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export function fetchTasks(projectId: number): Promise<Task[]> {
+  return request<Task[]>(`/api/projects/${projectId}/tasks`);
+}
+
+export function createTask(projectId: number, data: TaskInput): Promise<Task> {
+  return request<Task>(`/api/projects/${projectId}/tasks`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateTask(
+  id: number,
+  data: Partial<TaskInput> & { completed?: boolean },
+): Promise<Task> {
+  return request<Task>(`/api/tasks/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteTask(id: number): Promise<void> {
+  return request<void>(`/api/tasks/${id}`, {
     method: 'DELETE',
   });
 }
