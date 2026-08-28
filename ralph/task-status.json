@@ -337,10 +337,10 @@
       "id": 38,
       "title": "Add Reminders-style task row visuals",
       "description": "**What/Why**: The epic's `reminders-visuals` todo requires 'circular checkbox, title, optional note, colored label chips, subtle dividers, system font' in the Apple Reminders idiom. Currently TaskList uses inline styles with minimal polish.\n\n**Files**: `web/src/features/tasks/TaskList.tsx`, `web/src/styles/task-row.css` (new)\n\n**Approach**:\n1. Create `task-row.css` with CSS classes for task rows: `.task-row`, `.task-checkbox`, `.task-content`, `.task-title`, `.task-note`, `.task-labels`, `.task-label-chip`, `.task-actions`\n2. Custom circular checkbox using `appearance: none` + pseudo-element for checkmark (no proprietary assets)\n3. Add subtle dividers via `border-bottom` on `.task-row`\n4. System font already in `layout.css`; ensure inheritance\n5. Replace TaskList's inline styles with class references\n6. Import the CSS in TaskList.tsx\n\n**Tests to run**: `npm run build -w web`, `npm run test -w web`\n\n**Acceptance**: Task rows display circular checkbox, clean typography, subtle dividers; build passes; existing tests green.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T05:57:39.350Z"
+      "updatedAt": "2026-08-28T06:02:19.099Z"
     },
     {
       "id": 39,
@@ -370,18 +370,18 @@
       "updatedAt": "2026-08-28T05:57:39.350Z"
     }
   ],
-  "currentTaskNum": 37,
-  "totalLLMCalls": 52,
+  "currentTaskNum": 38,
+  "totalLLMCalls": 54,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 37,
-    "content": "## Task: Add API test for project-delete cascade to tasks\n\n**What/Why**: The epic's `api-tests` todo explicitly calls out 'project-delete cascade to tasks and task_labels rows' as a required test. This verifies the FK ON DELETE CASCADE behavior.\n\n**Files**: `api/src/routes/projects.test.ts` (extend existing)\n\n**Approach**: Add a new `describe('cascade behavior', ...)` block:\n1. Create a project, add 2 tasks, assign a label to one task\n2. DELETE the project\n3. Verify GET /api/tasks (all) no longer contains those tasks\n4. Verify the label itself still exists (only task_labels rows deleted, not the label)\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 1-2 new tests verifying cascade; suite still green.",
-    "updatedAt": "2026-08-28T05:57:39.353Z"
+    "taskId": 38,
+    "content": "## Task: Add Reminders-style task row visuals\n\n**What/Why**: The epic's `reminders-visuals` todo requires 'circular checkbox, title, optional note, colored label chips, subtle dividers, system font' in the Apple Reminders idiom. Currently TaskList uses inline styles with minimal polish.\n\n**Files**: `web/src/features/tasks/TaskList.tsx`, `web/src/styles/task-row.css` (new)\n\n**Approach**:\n1. Create `task-row.css` with CSS classes for task rows: `.task-row`, `.task-checkbox`, `.task-content`, `.task-title`, `.task-note`, `.task-labels`, `.task-label-chip`, `.task-actions`\n2. Custom circular checkbox using `appearance: none` + pseudo-element for checkmark (no proprietary assets)\n3. Add subtle dividers via `border-bottom` on `.task-row`\n4. System font already in `layout.css`; ensure inheritance\n5. Replace TaskList's inline styles with class references\n6. Import the CSS in TaskList.tsx\n\n**Tests to run**: `npm run build -w web`, `npm run test -w web`\n\n**Acceptance**: Task rows display circular checkbox, clean typography, subtle dividers; build passes; existing tests green.",
+    "updatedAt": "2026-08-28T05:59:38.349Z"
   },
   "feedback": {
-    "taskId": 37,
-    "content": "<status>verified</status>\n",
-    "updatedAt": "2026-08-28T05:59:38.334Z"
+    "taskId": 38,
+    "content": "Memory already has a thorough note on this exact task from the dev pass, so I won't duplicate it.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T06:02:19.097Z"
   },
-  "lastUpdated": "2026-08-28T05:59:38.335Z"
+  "lastUpdated": "2026-08-28T06:02:19.099Z"
 }

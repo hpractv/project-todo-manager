@@ -10,6 +10,7 @@ import {
 } from '../../store/tasksSlice';
 import type { Task, TaskWithProject } from '../../api/types';
 import FilterSortControls from './FilterSortControls';
+import '../../styles/task-row.css';
 
 interface TaskListProps {
   projectId?: number;
@@ -44,11 +45,12 @@ function TaskList({ projectId, onEdit, onDelete }: TaskListProps) {
       {tasks.length === 0 ? (
         <p>No tasks yet.</p>
       ) : (
-        <ul>
+        <ul className="task-list">
           {tasks.map((task) => (
-            <li key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <li key={task.id} className="task-row">
               <input
                 type="checkbox"
+                className="task-checkbox"
                 aria-label={
                   task.completed
                     ? `Mark "${task.title}" incomplete`
@@ -56,31 +58,22 @@ function TaskList({ projectId, onEdit, onDelete }: TaskListProps) {
                 }
                 checked={task.completed}
                 onChange={() => dispatch(toggleComplete(task))}
-                style={{ width: '1.1rem', height: '1.1rem', borderRadius: '50%' }}
               />
-              <div style={{ flex: 1 }}>
-                <div style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
+              <div className="task-content">
+                <div className={task.completed ? 'task-title task-title--completed' : 'task-title'}>
                   {task.title}
                 </div>
                 {currentSmartList !== null && (
-                  <div style={{ fontSize: '0.75em', color: '#888' }}>
-                    {(task as TaskWithProject).project_name}
-                  </div>
+                  <div className="task-project-name">{(task as TaskWithProject).project_name}</div>
                 )}
-                {task.note && <div style={{ fontSize: '0.85em', color: '#666' }}>{task.note}</div>}
+                {task.note && <div className="task-note">{task.note}</div>}
                 {task.labels && task.labels.length > 0 && (
-                  <div
-                    style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.25rem' }}
-                  >
+                  <div className="task-labels">
                     {task.labels.map((label) => (
                       <span
                         key={label.id}
-                        style={{
-                          background: label.color ?? '#ccc',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          fontSize: '0.75em',
-                        }}
+                        className="task-label-chip"
+                        style={{ backgroundColor: label.color ?? '#ccc' }}
                       >
                         {label.name}
                       </span>
@@ -88,12 +81,14 @@ function TaskList({ projectId, onEdit, onDelete }: TaskListProps) {
                   </div>
                 )}
               </div>
-              <button type="button" onClick={() => onEdit(task)}>
-                Edit
-              </button>
-              <button type="button" onClick={() => onDelete(task)}>
-                Delete
-              </button>
+              <div className="task-actions">
+                <button type="button" onClick={() => onEdit(task)}>
+                  Edit
+                </button>
+                <button type="button" onClick={() => onDelete(task)}>
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
