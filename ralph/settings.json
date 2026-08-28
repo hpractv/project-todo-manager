@@ -6,7 +6,7 @@
   "devReasoningEffort": "xhigh",
   "qaReasoningEffort": "high",
   "autoCommit": true,
-  "planFrequency": 1,
+  "planFrequency": 3,
   "minBacklogSize": 3,
   "agentBackend": "claude",
   "fleetMode": true,
@@ -24,7 +24,7 @@
   "dockerMountSocket": false,
   "dockerAutoMergeEpicWork": true,
   "copilotOutputFormat": "streaming",
-  "epicFile": "docs/epics/epic-001-foundation-scaffold.plan.md",
+  "epicFile": "docs/epics/epic-002-round2-core-completion.plan.md",
   "requirementsFile": "",
   "pauseAfterPlan": false,
   "taskColumnSort": "updatedAtDesc",
@@ -33,6 +33,11 @@
       "planModel": "claude-sonnet-5",
       "devModel": "gpt-5.4-mini",
       "qaModel": "gpt-5.4-mini"
+    },
+    "claude": {
+      "planModel": "claude-opus-4-5",
+      "devModel": "claude-sonnet-5",
+      "qaModel": "claude-sonnet-5"
     }
   }
 }

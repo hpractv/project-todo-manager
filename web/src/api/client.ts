@@ -1,6 +1,8 @@
 import type { Project, ProjectInput, ProjectWithTaskCount } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
+// Empty default uses same-origin `/api` paths so the Vite dev-server proxy
+// forwards them. That avoids CORS failures when Vite is not on port 5173.
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 export class ApiError extends Error {
   status: number;

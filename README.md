@@ -20,20 +20,20 @@ npm run dev
 Then open http://localhost:5173 in your browser.
 
 This starts both workspaces concurrently:
-- API server on http://localhost:3001
+- API server on http://localhost:3101
 - Web app (Vite dev server) on http://localhost:5173
 
 ## Development
 
 Root-level scripts (run from the repo root):
 
-| Command | Description |
-| --- | --- |
-| `npm install` | Install dependencies for both workspaces (`web/` and `api/`). |
-| `npm run dev` | Run the API and web dev servers concurrently. |
-| `npm run build` | Type-check and build both workspaces. |
-| `npm run test` | Run tests in both workspaces (if present). |
-| `npm run lint` | Lint both workspaces (if present). |
+| Command         | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| `npm install`   | Install dependencies for both workspaces (`web/` and `api/`). |
+| `npm run dev`   | Run the API and web dev servers concurrently.                 |
+| `npm run build` | Type-check and build both workspaces.                         |
+| `npm run test`  | Run tests in both workspaces (if present).                    |
+| `npm run lint`  | Lint both workspaces (if present).                            |
 
 Individual workspace commands (useful for running just one side, or with a custom
 `PORT`/`DB_PATH`/`VITE_API_URL`):
@@ -50,9 +50,12 @@ npm run build -w web
 npm run preview -w web
 ```
 
-The API listens on port `3001` by default; override with the `PORT` environment
-variable. The web dev server defaults to port `5173` (Vite falls back to the next
-free port, e.g. `5174`, if that port is in use).
+The API listens on port `3101` by default; override with the `PORT` environment
+variable (and set `API_PORT` to the same value if you run the Vite app separately).
+The web dev server defaults to port `5173` (Vite falls back to the next free port,
+e.g. `5174`, if that port is in use). Browser requests go to same-origin `/api`
+paths and Vite proxies them to the API, so creating a project still works when
+Vite is not on 5173.
 
 ## Database Location
 
