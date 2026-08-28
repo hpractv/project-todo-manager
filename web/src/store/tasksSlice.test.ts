@@ -1,12 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { describe, expect, it, vi } from 'vitest';
-import type { Task } from '../api/types';
+import type { Task, TaskWithProject } from '../api/types';
 import labelsReducer, { deleteLabel, updateLabel } from './labelsSlice';
 import projectsReducer from './projectsSlice';
 import tasksReducer, {
   createTask,
   deleteTask,
+  fetchAllTasks,
+  fetchCompletedTasks,
+  fetchTasksByLabel,
   fetchTasksByProject,
+  selectCurrentSmartList,
   selectCurrentTaskProjectId,
   selectFilteredSortedTasks,
   selectTasks,
@@ -30,6 +34,9 @@ vi.mock('../api/client', () => ({
   updateTask: vi.fn(),
   deleteTask: vi.fn(),
   setTaskLabels: vi.fn(),
+  fetchAllTasks: vi.fn(),
+  fetchCompletedTasks: vi.fn(),
+  fetchTasksByLabelId: vi.fn(),
   fetchLabels: vi.fn(),
   createLabel: vi.fn(),
   updateLabel: vi.fn(),
@@ -52,6 +59,10 @@ function makeTask(overrides: Partial<Task> = {}): Task {
   };
 }
 
+function makeTaskWithProject(overrides: Partial<TaskWithProject> = {}): TaskWithProject {
+  return { ...makeTask(), project_name: 'Groceries', ...overrides };
+}
+
 function makeStore() {
   return configureStore({
     reducer: { projects: projectsReducer, tasks: tasksReducer, labels: labelsReducer },
@@ -66,6 +77,7 @@ describe('tasksSlice initial state', () => {
       loading: false,
       error: null,
       currentProjectId: null,
+      currentSmartList: null,
       filterLabelIds: [],
       sortBy: 'completed',
       sortDir: 'asc',
@@ -97,6 +109,76 @@ describe('fetchTasksByProject', () => {
 
     expect(selectTasksError(store.getState())).toBe('network down');
     expect(selectTasksLoading(store.getState())).toBe(false);
+  });
+});
+
+describe('smart list thunks', () => {
+  it('fetchAllTasks loads cross-project tasks and records the smart list as "all"', async () => {
+    const task = makeTaskWithProject({ project_name: 'Groceries' });
+    vi.mocked(api.fetchAllTasks).mockResolvedValueOnce([task]);
+
+    const store = makeStore();
+    await store.dispatch(fetchTasksByProject(1));
+    await store.dispatch(fetchAllTasks());
+
+    expect(api.fetchAllTasks).toHaveBeenCalled();
+    expect(selectTasks(store.getState())).toEqual([task]);
+    expect(selectCurrentSmartList(store.getState())).toBe('all');
+    expect(selectCurrentTaskProjectId(store.getState())).toBeNull();
+  });
+
+  it('fetchCompletedTasks loads only completed tasks and records the smart list as "completed"', async () => {
+    const task = makeTaskWithProject({ completed: true });
+    vi.mocked(api.fetchCompletedTasks).mockResolvedValueOnce([task]);
+
+    const store = makeStore();
+    await store.dispatch(fetchCompletedTasks());
+
+    expect(api.fetchCompletedTasks).toHaveBeenCalled();
+    expect(selectTasks(store.getState())).toEqual([task]);
+    expect(selectCurrentSmartList(store.getState())).toBe('completed');
+  });
+
+  it('fetchTasksByLabel loads tasks for a label and records the smart list as the label id', async () => {
+    const task = makeTaskWithProject({
+      labels: [{ id: 7, name: 'Urgent', color: '#ff0000' }],
+    });
+    vi.mocked(api.fetchTasksByLabelId).mockResolvedValueOnce([task]);
+
+    const store = makeStore();
+    await store.dispatch(fetchTasksByLabel(7));
+
+    expect(api.fetchTasksByLabelId).toHaveBeenCalledWith(7);
+    expect(selectTasks(store.getState())).toEqual([task]);
+    expect(selectCurrentSmartList(store.getState())).toBe(7);
+  });
+
+  it('selecting a project clears the active smart list', async () => {
+    vi.mocked(api.fetchAllTasks).mockResolvedValueOnce([makeTaskWithProject()]);
+    vi.mocked(api.fetchTasks).mockResolvedValueOnce([makeTask()]);
+
+    const store = makeStore();
+    await store.dispatch(fetchAllTasks());
+    expect(selectCurrentSmartList(store.getState())).toBe('all');
+
+    await store.dispatch(fetchTasksByProject(1));
+
+    expect(selectCurrentSmartList(store.getState())).toBeNull();
+    expect(selectCurrentTaskProjectId(store.getState())).toBe(1);
+  });
+
+  it('deleting the label behind the active label smart list clears it', async () => {
+    vi.mocked(api.fetchTasksByLabelId).mockResolvedValueOnce([
+      makeTaskWithProject({ labels: [{ id: 7, name: 'Urgent', color: '#ff0000' }] }),
+    ]);
+    vi.mocked(api.deleteLabel).mockResolvedValueOnce(undefined);
+
+    const store = makeStore();
+    await store.dispatch(fetchTasksByLabel(7));
+    await store.dispatch(deleteLabel(7));
+
+    expect(selectCurrentSmartList(store.getState())).toBeNull();
+    expect(selectTasks(store.getState())).toEqual([]);
   });
 });
 

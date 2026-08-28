@@ -2,9 +2,24 @@ import { useEffect, useState } from 'react';
 import { DeleteConfirmDialog, ProjectForm, ProjectList } from './features/projects';
 import { DeleteTaskDialog, TaskForm, TaskList } from './features/tasks';
 import { DeleteLabelDialog, LabelForm, LabelList } from './features/labels';
+import { SmartListsSidebar } from './features/smartlists';
 import { useAppSelector } from './store/hooks';
+import { selectLabels } from './store/labelsSlice';
 import { selectSelectedProject } from './store/projectsSlice';
+import { selectCurrentSmartList } from './store/tasksSlice';
 import type { Label, ProjectWithTaskCount, Task } from './api/types';
+
+function smartListTitle(
+  currentSmartList: ReturnType<typeof selectCurrentSmartList>,
+  labels: ReturnType<typeof selectLabels>,
+): string {
+  if (currentSmartList === 'all') return 'All';
+  if (currentSmartList === 'completed') return 'Completed';
+  if (typeof currentSmartList === 'number') {
+    return labels.find((label) => label.id === currentSmartList)?.name ?? 'Label';
+  }
+  return '';
+}
 
 function App() {
   const [showForm, setShowForm] = useState(false);
@@ -12,6 +27,8 @@ function App() {
   const [deletingProject, setDeletingProject] = useState<ProjectWithTaskCount | null>(null);
 
   const selectedProject = useAppSelector(selectSelectedProject);
+  const currentSmartList = useAppSelector(selectCurrentSmartList);
+  const labels = useAppSelector(selectLabels);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
@@ -25,7 +42,7 @@ function App() {
     setShowTaskForm(false);
     setEditingTask(null);
     setDeletingTask(null);
-  }, [selectedProject?.id]);
+  }, [selectedProject?.id, currentSmartList]);
 
   function handleCloseForm() {
     setShowForm(false);
@@ -67,6 +84,7 @@ function App() {
       </div>
       <div style={{ display: 'flex', gap: '2rem' }}>
         <div>
+          <SmartListsSidebar />
           <button type="button" onClick={() => setShowForm(true)}>
             New Project
           </button>
@@ -96,6 +114,24 @@ function App() {
             <TaskList
               key={selectedProject.id}
               projectId={selectedProject.id}
+              onEdit={setEditingTask}
+              onDelete={setDeletingTask}
+            />
+          </div>
+        )}
+        {!selectedProject && currentSmartList !== null && (
+          <div>
+            <h2>{smartListTitle(currentSmartList, labels)}</h2>
+            {editingTask && (
+              <TaskForm
+                key={`smart-task-${editingTask.id}`}
+                projectId={editingTask.project_id}
+                task={editingTask}
+                onClose={handleCloseTaskForm}
+              />
+            )}
+            <TaskList
+              key={`smart-${currentSmartList}`}
               onEdit={setEditingTask}
               onDelete={setDeletingTask}
             />

@@ -2,16 +2,17 @@ import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   fetchTasksByProject,
+  selectCurrentSmartList,
   selectFilteredSortedTasks,
   selectTasksError,
   selectTasksLoading,
   toggleComplete,
 } from '../../store/tasksSlice';
-import type { Task } from '../../api/types';
+import type { Task, TaskWithProject } from '../../api/types';
 import FilterSortControls from './FilterSortControls';
 
 interface TaskListProps {
-  projectId: number;
+  projectId?: number;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }
@@ -21,9 +22,12 @@ function TaskList({ projectId, onEdit, onDelete }: TaskListProps) {
   const tasks = useAppSelector(selectFilteredSortedTasks);
   const loading = useAppSelector(selectTasksLoading);
   const error = useAppSelector(selectTasksError);
+  const currentSmartList = useAppSelector(selectCurrentSmartList);
 
   useEffect(() => {
-    dispatch(fetchTasksByProject(projectId));
+    if (projectId !== undefined) {
+      dispatch(fetchTasksByProject(projectId));
+    }
   }, [dispatch, projectId]);
 
   if (loading && tasks.length === 0) {
@@ -58,6 +62,11 @@ function TaskList({ projectId, onEdit, onDelete }: TaskListProps) {
                 <div style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
                   {task.title}
                 </div>
+                {currentSmartList !== null && (
+                  <div style={{ fontSize: '0.75em', color: '#888' }}>
+                    {(task as TaskWithProject).project_name}
+                  </div>
+                )}
                 {task.note && <div style={{ fontSize: '0.85em', color: '#666' }}>{task.note}</div>}
                 {task.labels && task.labels.length > 0 && (
                   <div

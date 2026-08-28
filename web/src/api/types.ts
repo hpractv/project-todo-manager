@@ -41,3 +41,7 @@ export interface TaskInput {
   title: string;
   note?: string | null;
 }
+
+export interface TaskWithProject extends Task {
+  project_name: string;
+}

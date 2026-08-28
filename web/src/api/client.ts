@@ -6,6 +6,7 @@ import type {
   ProjectWithTaskCount,
   Task,
   TaskInput,
+  TaskWithProject,
 } from './types';
 
 // Empty default uses same-origin `/api` paths so the Vite dev-server proxy
@@ -97,6 +98,18 @@ export function deleteTask(id: number): Promise<void> {
   return request<void>(`/api/tasks/${id}`, {
     method: 'DELETE',
   });
+}
+
+export function fetchAllTasks(): Promise<TaskWithProject[]> {
+  return request<TaskWithProject[]>('/api/tasks');
+}
+
+export function fetchCompletedTasks(): Promise<TaskWithProject[]> {
+  return request<TaskWithProject[]>('/api/tasks?completed=true');
+}
+
+export function fetchTasksByLabelId(labelId: number): Promise<TaskWithProject[]> {
+  return request<TaskWithProject[]>(`/api/tasks?labelId=${labelId}`);
 }
 
 export function fetchLabels(): Promise<Label[]> {

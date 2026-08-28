@@ -1,18 +1,21 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import * as api from '../api/client';
-import type { Task, TaskInput } from '../api/types';
+import type { Task, TaskInput, TaskWithProject } from '../api/types';
 import { deleteLabel, updateLabel } from './labelsSlice';
 import type { RootState } from './index';
 
 export type TaskSortBy = 'title' | 'label' | 'completed';
 export type SortDir = 'asc' | 'desc';
+/** number = label id smart list; null = no smart list active (viewing a project instead). */
+export type CurrentSmartList = 'all' | 'completed' | number | null;
 
 interface TasksState {
   tasks: Task[];
   loading: boolean;
   error: string | null;
   currentProjectId: number | null;
+  currentSmartList: CurrentSmartList;
   filterLabelIds: number[];
   sortBy: TaskSortBy;
   sortDir: SortDir;
@@ -23,6 +26,7 @@ const initialState: TasksState = {
   loading: false,
   error: null,
   currentProjectId: null,
+  currentSmartList: null,
   filterLabelIds: [],
   sortBy: 'completed',
   sortDir: 'asc',
@@ -61,6 +65,21 @@ export const setTaskLabels = createAsyncThunk<Task, { taskId: number; labelIds: 
   ({ taskId, labelIds }) => api.setTaskLabels(taskId, labelIds),
 );
 
+export const fetchAllTasks = createAsyncThunk<TaskWithProject[]>(
+  'tasks/fetchAllTasks',
+  () => api.fetchAllTasks(),
+);
+
+export const fetchCompletedTasks = createAsyncThunk<TaskWithProject[]>(
+  'tasks/fetchCompletedTasks',
+  () => api.fetchCompletedTasks(),
+);
+
+export const fetchTasksByLabel = createAsyncThunk<TaskWithProject[], number>(
+  'tasks/fetchTasksByLabel',
+  (labelId) => api.fetchTasksByLabelId(labelId),
+);
+
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -79,12 +98,55 @@ const tasksSlice = createSlice({
         state.loading = true;
         state.error = null;
         state.currentProjectId = action.meta.arg;
+        state.currentSmartList = null;
       })
       .addCase(fetchTasksByProject.fulfilled, (state, action) => {
         state.loading = false;
         state.tasks = action.payload;
       })
       .addCase(fetchTasksByProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? 'Unknown error';
+      })
+      .addCase(fetchAllTasks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.currentProjectId = null;
+        state.currentSmartList = 'all';
+      })
+      .addCase(fetchAllTasks.fulfilled, (state, action) => {
+        state.loading = false;
+        state.tasks = action.payload;
+      })
+      .addCase(fetchAllTasks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? 'Unknown error';
+      })
+      .addCase(fetchCompletedTasks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.currentProjectId = null;
+        state.currentSmartList = 'completed';
+      })
+      .addCase(fetchCompletedTasks.fulfilled, (state, action) => {
+        state.loading = false;
+        state.tasks = action.payload;
+      })
+      .addCase(fetchCompletedTasks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? 'Unknown error';
+      })
+      .addCase(fetchTasksByLabel.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+        state.currentProjectId = null;
+        state.currentSmartList = action.meta.arg;
+      })
+      .addCase(fetchTasksByLabel.fulfilled, (state, action) => {
+        state.loading = false;
+        state.tasks = action.payload;
+      })
+      .addCase(fetchTasksByLabel.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message ?? 'Unknown error';
       })
@@ -164,6 +226,10 @@ const tasksSlice = createSlice({
             task.labels = task.labels.filter((label) => label.id !== deletedId);
           }
         }
+        if (state.currentSmartList === deletedId) {
+          state.currentSmartList = null;
+          state.tasks = [];
+        }
       })
       .addCase(updateLabel.fulfilled, (state, action) => {
         const updatedLabel = action.payload;
@@ -190,6 +256,9 @@ export const selectTasksError = (state: RootState): string | null => state.tasks
 
 export const selectCurrentTaskProjectId = (state: RootState): number | null =>
   state.tasks.currentProjectId;
+
+export const selectCurrentSmartList = (state: RootState): CurrentSmartList =>
+  state.tasks.currentSmartList;
 
 export const selectFilterLabelIds = (state: RootState): number[] => state.tasks.filterLabelIds;
 
