@@ -51,7 +51,7 @@ function ProjectList({ onEdit, onDelete }: ProjectListProps) {
               aria-pressed={isSelected}
               style={{
                 fontWeight: isSelected ? 'bold' : 'normal',
-                backgroundColor: isSelected ? '#e0e7ff' : 'transparent',
+                backgroundColor: isSelected ? 'var(--color-selected-bg)' : 'transparent',
               }}
             >
               <span

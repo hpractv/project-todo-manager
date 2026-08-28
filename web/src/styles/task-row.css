@@ -9,7 +9,7 @@
   align-items: flex-start;
   gap: 0.65rem;
   padding: 0.65rem 0.25rem;
-  border-bottom: 1px solid #e5e5ea;
+  border-bottom: 1px solid var(--color-border-subtle);
   transition: background-color 0.15s ease;
 }
 
@@ -18,7 +18,7 @@
 }
 
 .task-row:hover {
-  background-color: #f5f5f7;
+  background-color: var(--color-hover-bg);
 }
 
 .task-checkbox {
@@ -28,7 +28,7 @@
   width: 1.2rem;
   height: 1.2rem;
   flex-shrink: 0;
-  border: 2px solid #c7c7cc;
+  border: 2px solid var(--color-checkbox-border);
   border-radius: 50%;
   position: relative;
   cursor: pointer;
@@ -39,7 +39,7 @@
 }
 
 .task-checkbox:hover {
-  border-color: #8e8e93;
+  border-color: var(--color-text-tertiary);
 }
 
 .task-checkbox:active {
@@ -47,8 +47,8 @@
 }
 
 .task-checkbox:checked {
-  background-color: #34c759;
-  border-color: #34c759;
+  background-color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .task-checkbox:checked::after {
@@ -58,7 +58,7 @@
   left: 50%;
   width: 4px;
   height: 8px;
-  border: solid #fff;
+  border: solid var(--color-checkmark);
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -55%) rotate(45deg);
 }
@@ -70,25 +70,25 @@
 
 .task-title {
   font-size: 0.95rem;
-  color: #1c1c1e;
+  color: var(--color-text);
   transition: color 0.15s ease;
 }
 
 .task-title--completed {
-  color: #8e8e93;
+  color: var(--color-text-tertiary);
   text-decoration: line-through;
 }
 
 .task-project-name {
   margin-top: 0.15rem;
   font-size: 0.75rem;
-  color: #8e8e93;
+  color: var(--color-text-tertiary);
 }
 
 .task-note {
   margin-top: 0.15rem;
   font-size: 0.85rem;
-  color: #6e6e73;
+  color: var(--color-text-secondary);
 }
 
 .task-labels {

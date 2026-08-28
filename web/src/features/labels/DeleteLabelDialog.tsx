@@ -36,7 +36,8 @@ function DeleteLabelDialog({ label, onClose }: DeleteLabelDialogProps) {
         aria-modal="true"
         aria-labelledby="delete-label-confirm-title"
         style={{
-          backgroundColor: 'white',
+          backgroundColor: 'var(--color-surface)',
+          color: 'var(--color-text)',
           padding: '1rem 1.5rem',
           borderRadius: '4px',
           minWidth: '20rem',

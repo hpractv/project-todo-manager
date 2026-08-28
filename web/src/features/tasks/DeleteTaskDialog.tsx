@@ -36,7 +36,8 @@ function DeleteTaskDialog({ task, onClose }: DeleteTaskDialogProps) {
         aria-modal="true"
         aria-labelledby="delete-task-confirm-title"
         style={{
-          backgroundColor: 'white',
+          backgroundColor: 'var(--color-surface)',
+          color: 'var(--color-text)',
           padding: '1rem 1.5rem',
           borderRadius: '4px',
           minWidth: '20rem',

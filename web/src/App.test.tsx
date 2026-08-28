@@ -29,6 +29,8 @@ vi.mock('./api/client', () => ({
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
+  document.documentElement.removeAttribute('data-theme');
 });
 
 describe('store', () => {
@@ -122,6 +124,39 @@ describe('smart lists', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Completed' }));
 
     expect(projectButton).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
+describe('theme toggle', () => {
+  it('defaults to light theme and switches to dark on click, persisting the choice', async () => {
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+    );
+
+    await screen.findByText('Project Todo Manager');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dark Mode' }));
+
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(localStorage.getItem('theme')).toBe('dark');
+    expect(screen.getByRole('button', { name: 'Light Mode' })).toBeInTheDocument();
+  });
+
+  it('restores a persisted theme choice on mount', async () => {
+    localStorage.setItem('theme', 'dark');
+
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+    );
+
+    await screen.findByText('Project Todo Manager');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByRole('button', { name: 'Light Mode' })).toBeInTheDocument();
   });
 });
 
