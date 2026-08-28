@@ -55,6 +55,23 @@ function TaskList({ projectId, onEdit, onDelete }: TaskListProps) {
               {task.title}
             </div>
             {task.note && <div style={{ fontSize: '0.85em', color: '#666' }}>{task.note}</div>}
+            {task.labels && task.labels.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.25rem' }}>
+                {task.labels.map((label) => (
+                  <span
+                    key={label.id}
+                    style={{
+                      background: label.color ?? '#ccc',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      fontSize: '0.75em',
+                    }}
+                  >
+                    {label.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <button type="button" onClick={() => onEdit(task)}>
             Edit

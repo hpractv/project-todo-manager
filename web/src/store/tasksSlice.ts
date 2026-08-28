@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import * as api from '../api/client';
 import type { Task, TaskInput } from '../api/types';
+import { deleteLabel, updateLabel } from './labelsSlice';
 import type { RootState } from './index';
 
 interface TasksState {
@@ -43,6 +44,11 @@ export const deleteTask = createAsyncThunk<number, number>(
     await api.deleteTask(id);
     return id;
   },
+);
+
+export const setTaskLabels = createAsyncThunk<Task, { taskId: number; labelIds: number[] }>(
+  'tasks/setTaskLabels',
+  ({ taskId, labelIds }) => api.setTaskLabels(taskId, labelIds),
 );
 
 const tasksSlice = createSlice({
@@ -117,6 +123,39 @@ const tasksSlice = createSlice({
       .addCase(deleteTask.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message ?? 'Unknown error';
+      })
+      .addCase(setTaskLabels.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(setTaskLabels.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.tasks.findIndex((task) => task.id === action.payload.id);
+        if (index !== -1) {
+          state.tasks[index] = action.payload;
+        }
+      })
+      .addCase(setTaskLabels.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? 'Unknown error';
+      })
+      .addCase(deleteLabel.fulfilled, (state, action) => {
+        const deletedId = action.payload;
+        for (const task of state.tasks) {
+          if (task.labels) {
+            task.labels = task.labels.filter((label) => label.id !== deletedId);
+          }
+        }
+      })
+      .addCase(updateLabel.fulfilled, (state, action) => {
+        const updatedLabel = action.payload;
+        for (const task of state.tasks) {
+          if (!task.labels) continue;
+          const index = task.labels.findIndex((label) => label.id === updatedLabel.id);
+          if (index !== -1) {
+            task.labels[index] = updatedLabel;
+          }
+        }
       });
   },
 });

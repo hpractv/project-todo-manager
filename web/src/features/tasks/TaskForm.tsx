@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { createTask, selectTasksLoading, updateTask } from '../../store/tasksSlice';
+import { createTask, selectTasksLoading, setTaskLabels, updateTask } from '../../store/tasksSlice';
 import type { Task } from '../../api/types';
+import LabelPicker from './LabelPicker';
 
 interface TaskFormProps {
   projectId: number;
@@ -15,6 +16,9 @@ function TaskForm({ projectId, task, onClose }: TaskFormProps) {
   const loading = useAppSelector(selectTasksLoading);
   const [title, setTitle] = useState(task?.title ?? '');
   const [note, setNote] = useState(task?.note ?? '');
+  const [selectedLabelIds, setSelectedLabelIds] = useState<number[]>(
+    task?.labels?.map((label) => label.id) ?? [],
+  );
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const isEditMode = task !== undefined;
@@ -34,10 +38,15 @@ function TaskForm({ projectId, task, onClose }: TaskFormProps) {
     try {
       if (task) {
         await dispatch(updateTask({ id: task.id, data })).unwrap();
+        await dispatch(setTaskLabels({ taskId: task.id, labelIds: selectedLabelIds })).unwrap();
       } else {
-        await dispatch(createTask({ projectId, data })).unwrap();
+        const created = await dispatch(createTask({ projectId, data })).unwrap();
+        await dispatch(
+          setTaskLabels({ taskId: created.id, labelIds: selectedLabelIds }),
+        ).unwrap();
         setTitle('');
         setNote('');
+        setSelectedLabelIds([]);
       }
       onClose?.();
     } catch {
@@ -64,6 +73,7 @@ function TaskForm({ projectId, task, onClose }: TaskFormProps) {
           onChange={(event) => setNote(event.target.value)}
         />
       </div>
+      <LabelPicker selectedIds={selectedLabelIds} onChange={setSelectedLabelIds} />
       {validationError && <p role="alert">{validationError}</p>}
       <button type="submit" disabled={loading}>
         {isEditMode ? 'Save' : 'Create'}

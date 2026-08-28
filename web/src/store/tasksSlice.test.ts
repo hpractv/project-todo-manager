@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { describe, expect, it, vi } from 'vitest';
 import type { Task } from '../api/types';
-import labelsReducer from './labelsSlice';
+import labelsReducer, { deleteLabel, updateLabel } from './labelsSlice';
 import projectsReducer from './projectsSlice';
 import tasksReducer, {
   createTask,
@@ -11,6 +11,7 @@ import tasksReducer, {
   selectTasks,
   selectTasksError,
   selectTasksLoading,
+  setTaskLabels,
   toggleComplete,
   updateTask,
 } from './tasksSlice';
@@ -25,6 +26,11 @@ vi.mock('../api/client', () => ({
   createTask: vi.fn(),
   updateTask: vi.fn(),
   deleteTask: vi.fn(),
+  setTaskLabels: vi.fn(),
+  fetchLabels: vi.fn(),
+  createLabel: vi.fn(),
+  updateLabel: vi.fn(),
+  deleteLabel: vi.fn(),
 }));
 
 import * as api from '../api/client';
@@ -145,5 +151,57 @@ describe('deleteTask', () => {
 
     expect(api.deleteTask).toHaveBeenCalledWith(1);
     expect(selectTasks(store.getState())).toEqual([]);
+  });
+});
+
+describe('setTaskLabels', () => {
+  it('calls the api with the label ids and replaces the task with its updated labels', async () => {
+    const original = makeTask();
+    const withLabels = makeTask({ labels: [{ id: 1, name: 'Urgent', color: '#ff0000' }] });
+    vi.mocked(api.fetchTasks).mockResolvedValueOnce([original]);
+    vi.mocked(api.setTaskLabels).mockResolvedValueOnce(withLabels);
+
+    const store = makeStore();
+    await store.dispatch(fetchTasksByProject(1));
+    await store.dispatch(setTaskLabels({ taskId: 1, labelIds: [1] }));
+
+    expect(api.setTaskLabels).toHaveBeenCalledWith(1, [1]);
+    expect(selectTasks(store.getState())).toEqual([withLabels]);
+  });
+});
+
+describe('reacting to label changes from labelsSlice', () => {
+  it('strips a deleted label from every task that had it embedded', async () => {
+    const taskWithLabel = makeTask({
+      labels: [
+        { id: 5, name: 'Urgent', color: '#ff0000' },
+        { id: 6, name: 'Later', color: '#00ff00' },
+      ],
+    });
+    vi.mocked(api.fetchTasks).mockResolvedValueOnce([taskWithLabel]);
+    vi.mocked(api.deleteLabel).mockResolvedValueOnce(undefined);
+
+    const store = makeStore();
+    await store.dispatch(fetchTasksByProject(1));
+    await store.dispatch(deleteLabel(5));
+
+    const [task] = selectTasks(store.getState());
+    expect(task.labels).toEqual([{ id: 6, name: 'Later', color: '#00ff00' }]);
+  });
+
+  it('patches an embedded label in place when it is renamed/recolored', async () => {
+    const taskWithLabel = makeTask({
+      labels: [{ id: 5, name: 'Urgent', color: '#ff0000' }],
+    });
+    const renamed = { id: 5, name: 'Critical', color: '#0000ff' };
+    vi.mocked(api.fetchTasks).mockResolvedValueOnce([taskWithLabel]);
+    vi.mocked(api.updateLabel).mockResolvedValueOnce(renamed);
+
+    const store = makeStore();
+    await store.dispatch(fetchTasksByProject(1));
+    await store.dispatch(updateLabel({ id: 5, data: { name: 'Critical', color: '#0000ff' } }));
+
+    const [task] = selectTasks(store.getState());
+    expect(task.labels).toEqual([renamed]);
   });
 });
