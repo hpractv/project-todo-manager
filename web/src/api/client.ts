@@ -1,4 +1,12 @@
-import type { Project, ProjectInput, ProjectWithTaskCount, Task, TaskInput } from './types';
+import type {
+  Label,
+  LabelInput,
+  Project,
+  ProjectInput,
+  ProjectWithTaskCount,
+  Task,
+  TaskInput,
+} from './types';
 
 // Empty default uses same-origin `/api` paths so the Vite dev-server proxy
 // forwards them. That avoids CORS failures when Vite is not on port 5173.
@@ -88,5 +96,36 @@ export function updateTask(
 export function deleteTask(id: number): Promise<void> {
   return request<void>(`/api/tasks/${id}`, {
     method: 'DELETE',
+  });
+}
+
+export function fetchLabels(): Promise<Label[]> {
+  return request<Label[]>('/api/labels');
+}
+
+export function createLabel(data: LabelInput): Promise<Label> {
+  return request<Label>('/api/labels', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateLabel(id: number, data: Partial<LabelInput>): Promise<Label> {
+  return request<Label>(`/api/labels/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteLabel(id: number): Promise<void> {
+  return request<void>(`/api/labels/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export function setTaskLabels(taskId: number, labelIds: number[]): Promise<Task> {
+  return request<Task>(`/api/tasks/${taskId}/labels`, {
+    method: 'PUT',
+    body: JSON.stringify({ label_ids: labelIds }),
   });
 }

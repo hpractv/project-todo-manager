@@ -14,6 +14,17 @@ export interface ProjectInput {
   description?: string | null;
 }
 
+export interface Label {
+  id: number;
+  name: string;
+  color: string | null;
+}
+
+export interface LabelInput {
+  name: string;
+  color?: string | null;
+}
+
 export interface Task {
   id: number;
   project_id: number;
@@ -23,6 +34,7 @@ export interface Task {
   sort_order: number | null;
   created_at: string;
   updated_at: string;
+  labels?: Label[];
 }
 
 export interface TaskInput {
