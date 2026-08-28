@@ -8,9 +8,12 @@ import tasksReducer, {
   deleteTask,
   fetchTasksByProject,
   selectCurrentTaskProjectId,
+  selectFilteredSortedTasks,
   selectTasks,
   selectTasksError,
   selectTasksLoading,
+  setFilterLabels,
+  setSort,
   setTaskLabels,
   toggleComplete,
   updateTask,
@@ -63,6 +66,9 @@ describe('tasksSlice initial state', () => {
       loading: false,
       error: null,
       currentProjectId: null,
+      filterLabelIds: [],
+      sortBy: 'completed',
+      sortDir: 'asc',
     });
   });
 });
@@ -167,6 +173,82 @@ describe('setTaskLabels', () => {
 
     expect(api.setTaskLabels).toHaveBeenCalledWith(1, [1]);
     expect(selectTasks(store.getState())).toEqual([withLabels]);
+  });
+});
+
+describe('selectFilteredSortedTasks', () => {
+  const urgent = { id: 1, name: 'Urgent', color: '#ff0000' };
+  const home = { id: 2, name: 'Home', color: '#00ff00' };
+
+  const taskA = makeTask({ id: 1, title: 'Beta task', completed: false, labels: [urgent, home] });
+  const taskB = makeTask({ id: 2, title: 'Alpha task', completed: true, labels: [urgent] });
+  const taskC = makeTask({ id: 3, title: 'Gamma task', completed: false, labels: [] });
+  const taskD = makeTask({ id: 4, title: 'Delta task', completed: false, labels: [home] });
+
+  async function makeSeededStore() {
+    vi.mocked(api.fetchTasks).mockResolvedValueOnce([taskA, taskB, taskC, taskD]);
+    const store = makeStore();
+    await store.dispatch(fetchTasksByProject(1));
+    return store;
+  }
+
+  it('returns every task, sorted by the default tie-break, when no filter is set', async () => {
+    const store = await makeSeededStore();
+
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([1, 4, 3, 2]);
+  });
+
+  it('filters to tasks with the selected label', async () => {
+    const store = await makeSeededStore();
+
+    store.dispatch(setFilterLabels([1]));
+
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([1, 2]);
+  });
+
+  it('applies AND semantics when multiple labels are selected', async () => {
+    const store = await makeSeededStore();
+
+    store.dispatch(setFilterLabels([1, 2]));
+
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([1]);
+  });
+
+  it('restores the full list when the filter is cleared', async () => {
+    const store = await makeSeededStore();
+
+    store.dispatch(setFilterLabels([1]));
+    store.dispatch(setFilterLabels([]));
+
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([1, 4, 3, 2]);
+  });
+
+  it('sorts by title ascending, then descending', async () => {
+    const store = await makeSeededStore();
+
+    store.dispatch(setSort({ sortBy: 'title', sortDir: 'asc' }));
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([2, 1, 4, 3]);
+
+    store.dispatch(setSort({ sortBy: 'title', sortDir: 'desc' }));
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([3, 4, 1, 2]);
+  });
+
+  it('sorts by completion, tie-breaking incomplete tasks by title', async () => {
+    const store = await makeSeededStore();
+
+    store.dispatch(setSort({ sortBy: 'completed', sortDir: 'asc' }));
+
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([1, 4, 3, 2]);
+  });
+
+  it('sorts by label, using the lowest alphabetical label per task and tie-breaking on title', async () => {
+    const store = await makeSeededStore();
+
+    store.dispatch(setSort({ sortBy: 'label', sortDir: 'asc' }));
+
+    // taskC has no labels ('' sorts first), taskA/taskD both key on 'Home' (tie-break: title),
+    // taskB keys on 'Urgent'.
+    expect(selectFilteredSortedTasks(store.getState()).map((t) => t.id)).toEqual([3, 1, 4, 2]);
   });
 });
 

@@ -1,14 +1,21 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import * as api from '../api/client';
 import type { Task, TaskInput } from '../api/types';
 import { deleteLabel, updateLabel } from './labelsSlice';
 import type { RootState } from './index';
+
+export type TaskSortBy = 'title' | 'label' | 'completed';
+export type SortDir = 'asc' | 'desc';
 
 interface TasksState {
   tasks: Task[];
   loading: boolean;
   error: string | null;
   currentProjectId: number | null;
+  filterLabelIds: number[];
+  sortBy: TaskSortBy;
+  sortDir: SortDir;
 }
 
 const initialState: TasksState = {
@@ -16,6 +23,9 @@ const initialState: TasksState = {
   loading: false,
   error: null,
   currentProjectId: null,
+  filterLabelIds: [],
+  sortBy: 'completed',
+  sortDir: 'asc',
 };
 
 export const fetchTasksByProject = createAsyncThunk<Task[], number>(
@@ -54,7 +64,15 @@ export const setTaskLabels = createAsyncThunk<Task, { taskId: number; labelIds: 
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
-  reducers: {},
+  reducers: {
+    setFilterLabels(state, action: PayloadAction<number[]>) {
+      state.filterLabelIds = action.payload;
+    },
+    setSort(state, action: PayloadAction<{ sortBy: TaskSortBy; sortDir: SortDir }>) {
+      state.sortBy = action.payload.sortBy;
+      state.sortDir = action.payload.sortDir;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTasksByProject.pending, (state, action) => {
@@ -160,6 +178,8 @@ const tasksSlice = createSlice({
   },
 });
 
+export const { setFilterLabels, setSort } = tasksSlice.actions;
+
 export default tasksSlice.reducer;
 
 export const selectTasks = (state: RootState): Task[] => state.tasks.tasks;
@@ -170,3 +190,55 @@ export const selectTasksError = (state: RootState): string | null => state.tasks
 
 export const selectCurrentTaskProjectId = (state: RootState): number | null =>
   state.tasks.currentProjectId;
+
+export const selectFilterLabelIds = (state: RootState): number[] => state.tasks.filterLabelIds;
+
+export const selectSortBy = (state: RootState): TaskSortBy => state.tasks.sortBy;
+
+export const selectSortDir = (state: RootState): SortDir => state.tasks.sortDir;
+
+/** Lowest alphabetical label name on a task, or '' when it has none, used as the 'label' sort key. */
+function labelSortKey(task: Task): string {
+  if (!task.labels || task.labels.length === 0) {
+    return '';
+  }
+  return task.labels
+    .map((label) => label.name)
+    .sort((a, b) => a.localeCompare(b))[0];
+}
+
+// Tie-breaking: incomplete first, then title alphabetically. Applied after the
+// primary sort key so every sort option remains fully deterministic.
+function compareTasks(a: Task, b: Task, sortBy: TaskSortBy, sortDir: SortDir): number {
+  const dir = sortDir === 'desc' ? -1 : 1;
+  let primary = 0;
+  switch (sortBy) {
+    case 'title':
+      primary = a.title.localeCompare(b.title);
+      break;
+    case 'completed':
+      primary = Number(a.completed) - Number(b.completed);
+      break;
+    case 'label':
+      primary = labelSortKey(a).localeCompare(labelSortKey(b));
+      break;
+  }
+  if (primary !== 0) {
+    return primary * dir;
+  }
+  if (a.completed !== b.completed) {
+    return a.completed ? 1 : -1;
+  }
+  return a.title.localeCompare(b.title);
+}
+
+export const selectFilteredSortedTasks = (state: RootState): Task[] => {
+  const { tasks, filterLabelIds, sortBy, sortDir } = state.tasks;
+  const filtered =
+    filterLabelIds.length === 0
+      ? tasks
+      : tasks.filter((task) =>
+          filterLabelIds.every((labelId) => task.labels?.some((label) => label.id === labelId)),
+        );
+  return [...filtered].sort((a, b) => compareTasks(a, b, sortBy, sortDir));
+};
