@@ -18,6 +18,29 @@ export function initSchema(): void {
       description TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      note TEXT,
+      completed INTEGER DEFAULT 0,
+      sort_order INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS labels (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      color TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS task_labels (
+      task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
+      label_id INTEGER REFERENCES labels(id) ON DELETE CASCADE,
+      PRIMARY KEY (task_id, label_id)
+    );
   `);
 }
 

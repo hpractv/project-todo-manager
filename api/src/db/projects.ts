@@ -10,7 +10,12 @@ const selectByIdStmt = db.prepare<{ id: number }>(
 );
 
 const selectAllWithTaskCountStmt = db.prepare(
-  'SELECT id, name, description, created_at, 0 AS task_count FROM projects ORDER BY id',
+  `SELECT projects.id, projects.name, projects.description, projects.created_at,
+          COUNT(tasks.id) AS task_count
+   FROM projects
+   LEFT JOIN tasks ON tasks.project_id = projects.id
+   GROUP BY projects.id
+   ORDER BY projects.id`,
 );
 
 const deleteStmt = db.prepare<{ id: number }>('DELETE FROM projects WHERE id = @id');

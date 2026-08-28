@@ -1,0 +1,76 @@
+:root {
+  color-scheme: light;
+
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f7;
+  --color-text: #1c1c1e;
+  --color-text-secondary: #6e6e73;
+  --color-text-tertiary: #8e8e93;
+  --color-border: #d1d1d6;
+  --color-border-subtle: #e5e5ea;
+  --color-accent: #007aff;
+  --color-success: #34c759;
+  --color-hover-bg: #f5f5f7;
+  --color-selected-bg: #e0e7ff;
+  --color-checkbox-border: #c7c7cc;
+  --color-checkmark: #ffffff;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: #1c1c1e;
+  --color-surface: #2c2c2e;
+  --color-text: #f2f2f7;
+  --color-text-secondary: #aeaeb2;
+  --color-text-tertiary: #98989d;
+  --color-border: #48484a;
+  --color-border-subtle: #38383a;
+  --color-accent: #0a84ff;
+  --color-success: #30d158;
+  --color-hover-bg: #2c2c2e;
+  --color-selected-bg: #33385e;
+  --color-checkbox-border: #636366;
+  --color-checkmark: #ffffff;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+button,
+input,
+textarea,
+select {
+  color: inherit;
+  font: inherit;
+}
+
+.theme-toggle {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-text-tertiary);
+}
+
+.theme-toggle:active {
+  transform: scale(0.96);
+}

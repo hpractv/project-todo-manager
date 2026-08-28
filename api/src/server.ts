@@ -1,10 +1,31 @@
 import express from 'express';
 import cors from 'cors';
 import projectsRouter from './routes/projects.js';
+import tasksRouter from './routes/tasks.js';
+import labelsRouter from './routes/labels.js';
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+function isLocalDevOrigin(origin: string | undefined): boolean {
+  if (!origin) {
+    return true;
+  }
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      callback(null, isLocalDevOrigin(origin));
+    },
+  }),
+);
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {
@@ -12,5 +33,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/projects', projectsRouter);
+app.use('/api', tasksRouter);
+app.use('/api/labels', labelsRouter);
 
 export default app;

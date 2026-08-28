@@ -8,6 +8,7 @@ import {
   selectProjectsLoading,
   selectSelectedProject,
 } from '../../store/projectsSlice';
+import { colorForId } from '../../utils/colorForId';
 import type { ProjectWithTaskCount } from '../../api/types';
 
 interface ProjectListProps {
@@ -50,9 +51,20 @@ function ProjectList({ onEdit, onDelete }: ProjectListProps) {
               aria-pressed={isSelected}
               style={{
                 fontWeight: isSelected ? 'bold' : 'normal',
-                backgroundColor: isSelected ? '#e0e7ff' : 'transparent',
+                backgroundColor: isSelected ? 'var(--color-selected-bg)' : 'transparent',
               }}
             >
+              <span
+                aria-hidden="true"
+                style={{
+                  display: 'inline-block',
+                  width: '0.7rem',
+                  height: '0.7rem',
+                  borderRadius: '50%',
+                  backgroundColor: colorForId(project.id),
+                  marginRight: '0.4rem',
+                }}
+              />
               {project.name} ({project.task_count})
             </button>
             <button type="button" onClick={() => onEdit(project)}>

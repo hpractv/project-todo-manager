@@ -1,21 +1,21 @@
 import { useAppDispatch } from '../../store/hooks';
-import { deleteProject } from '../../store/projectsSlice';
-import type { Project } from '../../api/types';
+import { deleteLabel } from '../../store/labelsSlice';
+import type { Label } from '../../api/types';
 
-interface DeleteConfirmDialogProps {
-  project: Project;
+interface DeleteLabelDialogProps {
+  label: Label;
   onClose: () => void;
 }
 
-function DeleteConfirmDialog({ project, onClose }: DeleteConfirmDialogProps) {
+function DeleteLabelDialog({ label, onClose }: DeleteLabelDialogProps) {
   const dispatch = useAppDispatch();
 
   async function handleConfirm() {
     try {
-      await dispatch(deleteProject(project.id)).unwrap();
+      await dispatch(deleteLabel(label.id)).unwrap();
       onClose();
     } catch {
-      // error is surfaced via the projects slice's shared error state
+      // error is surfaced via the labels slice's shared error state
     }
   }
 
@@ -34,7 +34,7 @@ function DeleteConfirmDialog({ project, onClose }: DeleteConfirmDialogProps) {
       <div
         role="alertdialog"
         aria-modal="true"
-        aria-labelledby="delete-confirm-title"
+        aria-labelledby="delete-label-confirm-title"
         style={{
           backgroundColor: 'var(--color-surface)',
           color: 'var(--color-text)',
@@ -43,8 +43,8 @@ function DeleteConfirmDialog({ project, onClose }: DeleteConfirmDialogProps) {
           minWidth: '20rem',
         }}
       >
-        <p id="delete-confirm-title">
-          Are you sure you want to delete project &quot;{project.name}&quot;?
+        <p id="delete-label-confirm-title">
+          Are you sure you want to delete label &quot;{label.name}&quot;?
         </p>
         <button type="button" onClick={handleConfirm}>
           Confirm
@@ -57,4 +57,4 @@ function DeleteConfirmDialog({ project, onClose }: DeleteConfirmDialogProps) {
   );
 }
 
-export default DeleteConfirmDialog;
+export default DeleteLabelDialog;
