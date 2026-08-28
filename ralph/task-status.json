@@ -202,10 +202,10 @@
       "id": 23,
       "title": "Labels + task_labels schema",
       "description": "**What/why:** Add the labels table and task_labels join table to initSchema, enabling Phase 2's unified label system.\n\n**Files:**\n- `api/src/db/index.ts` (append two CREATE TABLE IF NOT EXISTS statements)\n\n**Approach:**\n1. Add `labels` table: `id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, color TEXT`.\n2. Add `task_labels` join table: `task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE, label_id INTEGER REFERENCES labels(id) ON DELETE CASCADE, PRIMARY KEY(task_id, label_id)`.\n3. Both tables are additive/idempotent (IF NOT EXISTS pattern matches existing projects/tasks tables).\n4. No UNIQUE constraint on labels.name - allows duplicate label names if desired (or add UNIQUE if product decision differs).\n\n**Tests to run:** `npm run build -w api`, `npm run test -w api` (existing 13 tests still pass), manual sqlite3 verification (`.tables`, `.schema labels`, `.schema task_labels`, PRAGMA foreign_key_list, delete-cascade verification).\n\n**Acceptance:**\n- Schema matches spec exactly.\n- Idempotent - second server start against same DB is a no-op.\n- Deleting a label cascades to remove task_labels rows but not tasks.\n- Deleting a task cascades to remove its task_labels rows.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:09:55.534Z"
+      "updatedAt": "2026-08-28T04:24:26.907Z"
     },
     {
       "id": 24,
@@ -325,18 +325,18 @@
       "updatedAt": "2026-08-28T04:09:55.534Z"
     }
   ],
-  "currentTaskNum": 22,
-  "totalLLMCalls": 15,
+  "currentTaskNum": 23,
+  "totalLLMCalls": 17,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 22,
-    "content": "## Task: Task UI components + App wiring\n\n**What/why:** Complete Phase 1 by adding TaskList and TaskForm components, plus a delete confirmation dialog for tasks, and wire them into App.tsx so selecting a project shows its tasks in a panel. This closes the gap between the existing tasksSlice/API and actual user interaction.\n\n**Files:**\n- `web/src/features/tasks/TaskList.tsx` (new)\n- `web/src/features/tasks/TaskForm.tsx` (new)\n- `web/src/features/tasks/DeleteTaskDialog.tsx` (new)\n- `web/src/features/tasks/index.ts` (new barrel)\n- `web/src/App.tsx` (wire task panel)\n\n**Approach:**\n1. Create `web/src/features/tasks/` folder.\n2. TaskList: renders `selectTasks`, shows checkbox toggle (dispatches `toggleComplete`), Edit/Delete buttons, loading/error states. Checkbox is circular for Reminders look-alike. When project changes (`selectedProjectId`), dispatches `fetchTasksByProject`.\n3. TaskForm: title (required) + note (optional) fields. Create mode dispatches `createTask`, edit mode dispatches `updateTask`. Similar pattern to ProjectForm (local validation, clear on success, key-remount on edit target change).\n4. DeleteTaskDialog: confirm/cancel modal pattern matching DeleteConfirmDialog for projects.\n5. App.tsx: track `selectedProjectId`. When a project is clicked, fetch tasks and show TaskList + TaskForm in a right panel (side-by-side layout prep for Phase 4). Use `key={selectedProjectId}` on TaskList to refetch on selection change.\n\n**Tests to run:** `npm run build -w web`, `npm run test -w web`, manual browser verification (create/toggle/edit/delete tasks).\n\n**Acceptance:**\n- Selecting a project shows only its tasks (AC-033).\n- Create task with title only; add note; reload - persists (AC-032).\n- Edit/delete task persists (AC-034, AC-035).\n- Toggle completion on/off; reload - state and styling persist (AC-036).",
-    "updatedAt": "2026-08-28T04:09:55.543Z"
+    "taskId": 23,
+    "content": "## Task: Labels + task_labels schema\n\n**What/why:** Add the labels table and task_labels join table to initSchema, enabling Phase 2's unified label system.\n\n**Files:**\n- `api/src/db/index.ts` (append two CREATE TABLE IF NOT EXISTS statements)\n\n**Approach:**\n1. Add `labels` table: `id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, color TEXT`.\n2. Add `task_labels` join table: `task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE, label_id INTEGER REFERENCES labels(id) ON DELETE CASCADE, PRIMARY KEY(task_id, label_id)`.\n3. Both tables are additive/idempotent (IF NOT EXISTS pattern matches existing projects/tasks tables).\n4. No UNIQUE constraint on labels.name - allows duplicate label names if desired (or add UNIQUE if product decision differs).\n\n**Tests to run:** `npm run build -w api`, `npm run test -w api` (existing 13 tests still pass), manual sqlite3 verification (`.tables`, `.schema labels`, `.schema task_labels`, PRAGMA foreign_key_list, delete-cascade verification).\n\n**Acceptance:**\n- Schema matches spec exactly.\n- Idempotent - second server start against same DB is a no-op.\n- Deleting a label cascades to remove task_labels rows but not tasks.\n- Deleting a task cascades to remove its task_labels rows.",
+    "updatedAt": "2026-08-28T04:18:00.577Z"
   },
   "feedback": {
-    "taskId": 22,
-    "content": "All acceptance criteria verified: build clean, existing test suites green (10 web, 13 api), and an independent DOM-level smoke test plus a direct API/DB persistence check confirmed project-scoped task display, create (title-only and with note), edit with pre-populated fields, toggle-complete with line-through styling and real DB persistence, and delete with cancel/confirm. Code correctly mirrors existing conventions (ProjectForm/DeleteConfirmDialog patterns), and the stale-modal-state cleanup effect in App.tsx is a sensible addition beyond the literal task spec.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T04:18:00.559Z"
+    "taskId": 23,
+    "content": "# QA Result\n\nTask #23 (Labels + task_labels schema) verified:\n\n- `api/src/db/index.ts` diff is scoped exactly as specified: two additive `CREATE TABLE IF NOT EXISTS` statements (`labels`, `task_labels`) appended after `tasks`, matching the spec's column definitions and FK cascade behavior exactly.\n- `npm run build -w api` compiles cleanly.\n- `npm run test -w api` — existing 13 tests pass, unaffected.\n- Idempotency confirmed: started the compiled server twice against the same DB file; second start is a no-op with no errors.\n- Cascade behavior confirmed directly against the DB: deleting a label removes only its `task_labels` rows (task itself untouched, other label assignments intact); deleting a task removes its remaining `task_labels` rows.\n- No leftover scratch files in git status.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T04:24:26.904Z"
   },
-  "lastUpdated": "2026-08-28T04:18:00.561Z"
+  "lastUpdated": "2026-08-28T04:24:26.907Z"
 }

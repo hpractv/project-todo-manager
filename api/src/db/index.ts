@@ -29,6 +29,18 @@ export function initSchema(): void {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS labels (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      color TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS task_labels (
+      task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
+      label_id INTEGER REFERENCES labels(id) ON DELETE CASCADE,
+      PRIMARY KEY (task_id, label_id)
+    );
   `);
 }
 
