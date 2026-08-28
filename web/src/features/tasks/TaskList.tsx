@@ -1,0 +1,71 @@
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import {
+  fetchTasksByProject,
+  selectTasks,
+  selectTasksError,
+  selectTasksLoading,
+  toggleComplete,
+} from '../../store/tasksSlice';
+import type { Task } from '../../api/types';
+
+interface TaskListProps {
+  projectId: number;
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
+}
+
+function TaskList({ projectId, onEdit, onDelete }: TaskListProps) {
+  const dispatch = useAppDispatch();
+  const tasks = useAppSelector(selectTasks);
+  const loading = useAppSelector(selectTasksLoading);
+  const error = useAppSelector(selectTasksError);
+
+  useEffect(() => {
+    dispatch(fetchTasksByProject(projectId));
+  }, [dispatch, projectId]);
+
+  if (loading && tasks.length === 0) {
+    return <p>Loading tasks...</p>;
+  }
+
+  if (error) {
+    return <p role="alert">Error: {error}</p>;
+  }
+
+  if (tasks.length === 0) {
+    return <p>No tasks yet.</p>;
+  }
+
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input
+            type="checkbox"
+            aria-label={
+              task.completed ? `Mark "${task.title}" incomplete` : `Mark "${task.title}" complete`
+            }
+            checked={task.completed}
+            onChange={() => dispatch(toggleComplete(task))}
+            style={{ width: '1.1rem', height: '1.1rem', borderRadius: '50%' }}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
+              {task.title}
+            </div>
+            {task.note && <div style={{ fontSize: '0.85em', color: '#666' }}>{task.note}</div>}
+          </div>
+          <button type="button" onClick={() => onEdit(task)}>
+            Edit
+          </button>
+          <button type="button" onClick={() => onDelete(task)}>
+            Delete
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default TaskList;
