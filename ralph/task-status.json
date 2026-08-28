@@ -328,10 +328,10 @@
       "id": 37,
       "title": "Add API test for project-delete cascade to tasks",
       "description": "**What/Why**: The epic's `api-tests` todo explicitly calls out 'project-delete cascade to tasks and task_labels rows' as a required test. This verifies the FK ON DELETE CASCADE behavior.\n\n**Files**: `api/src/routes/projects.test.ts` (extend existing)\n\n**Approach**: Add a new `describe('cascade behavior', ...)` block:\n1. Create a project, add 2 tasks, assign a label to one task\n2. DELETE the project\n3. Verify GET /api/tasks (all) no longer contains those tasks\n4. Verify the label itself still exists (only task_labels rows deleted, not the label)\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 1-2 new tests verifying cascade; suite still green.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
+      "updatedAt": "2026-08-28T05:59:38.335Z"
     },
     {
       "id": 38,
@@ -340,7 +340,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
+      "updatedAt": "2026-08-28T05:57:39.350Z"
     },
     {
       "id": 39,
@@ -349,7 +349,7 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T04:29:47.660Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
+      "updatedAt": "2026-08-28T05:57:39.350Z"
     },
     {
       "id": 40,
@@ -358,39 +358,30 @@
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T05:45:44.659Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
-    },
-    {
-      "id": 41,
-      "title": "Expand web tests for filtering/sorting and smart-list selection",
-      "description": "**What/Why**: The epic's `web-tests` todo requires tests for 'filtering/sorting logic, smart-list selection'. tasksSlice.test.ts has 13 tests but needs explicit coverage for edge cases and selector behavior.\n\n**Files**: `web/src/store/tasksSlice.test.ts` (extend)\n\n**Approach**: Add tests for:\n- `selectFilteredSortedTasks` with empty filter vs multi-label AND filter\n- Sort by 'label' key with tasks having 0/1/multiple labels (verify lowest-alpha logic)\n- `sortDir: 'desc'` inverts primary key but preserves tie-break\n- `currentSmartList` transitions: project->smart-list clears project, smart-list->project clears smart-list\n- `deleteLabel.fulfilled` prunes embedded labels and clears `currentSmartList` if it was that label\n\n**Tests to run**: `npm run test -w web`\n\n**Acceptance**: 5+ new tests covering filter/sort edge cases; suite green.",
-      "status": "backlog",
-      "devIterations": 0,
-      "createdAt": "2026-08-28T05:45:44.659Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
+      "updatedAt": "2026-08-28T05:57:39.350Z"
     },
     {
       "id": 42,
       "title": "Document single-command test suite in README",
-      "description": "**What/Why**: The epic's `single-command-suite` todo requires 'a single documented command runs the full api + web suite green with no network access'. The command `npm run test` exists but README doesn't explicitly document it for CI or explain network isolation.\n\n**Files**: `README.md`\n\n**Approach**:\n1. Add a '## Testing' section after '## Development'\n2. Document `npm run test` as the single command that runs both `api` (vitest) and `web` (vitest+jsdom) suites\n3. Note that tests use scratch in-memory/temp DB files and mock HTTP calls, so no network access is required\n4. Optionally add `npm run test -- --coverage` note if coverage is desired\n\n**Tests to run**: `npm run test` (confirm it still passes)\n\n**Acceptance**: README has explicit Testing section documenting the single command; `npm run test` runs 47+ tests green.",
+      "description": "**What/Why**: The epic's `single-command-suite` todo requires 'a single documented command runs the full api + web suite green with no network access'. The command `npm run test` exists but README doesn't explicitly document it for CI or explain network isolation.\n\n**Files**: `README.md`\n\n**Approach**:\n1. Add a '## Testing' section after '## Development'\n2. Document `npm run test` as the single command that runs both `api` (vitest) and `web` (vitest+jsdom) suites\n3. Note that tests use scratch in-memory/temp DB files and mock HTTP calls, so no network access is required\n4. Mention current test count (58 API + 34 web = 92 total tests)\n\n**Tests to run**: `npm run test` (confirm it still passes)\n\n**Acceptance**: README has explicit Testing section documenting the single command; `npm run test` runs 90+ tests green.",
       "status": "backlog",
       "devIterations": 0,
       "createdAt": "2026-08-28T05:45:44.659Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
+      "updatedAt": "2026-08-28T05:57:39.350Z"
     }
   ],
-  "currentTaskNum": 36,
-  "totalLLMCalls": 49,
+  "currentTaskNum": 37,
+  "totalLLMCalls": 52,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 36,
-    "content": "## Task: Add API integration tests for smart-list queries\n\n**What/Why**: The epic's `api-tests` todo requires coverage for cross-project smart-list queries. GET /api/tasks endpoint has 3 query variants that need testing.\n\n**Files**: `api/src/routes/smart-lists.test.ts` (new, or extend `tasks.test.ts`)\n\n**Approach**: Seed 2 projects with tasks (some completed, some labeled) in `beforeEach`. Cover:\n- GET /api/tasks: returns all tasks with correct `project_name` and `labels` arrays\n- GET /api/tasks?completed=true: returns only completed tasks\n- GET /api/tasks?labelId=<valid>: returns only tasks with that label\n- GET /api/tasks?labelId=9999: 400 unknown label id\n- GET /api/tasks?labelId=abc: 400 malformed label id\n- Verify sort order matches spec (incomplete first, then title)\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 6+ tests covering all smart-list query variants; all green.",
-    "updatedAt": "2026-08-28T05:51:55.050Z"
+    "taskId": 37,
+    "content": "## Task: Add API test for project-delete cascade to tasks\n\n**What/Why**: The epic's `api-tests` todo explicitly calls out 'project-delete cascade to tasks and task_labels rows' as a required test. This verifies the FK ON DELETE CASCADE behavior.\n\n**Files**: `api/src/routes/projects.test.ts` (extend existing)\n\n**Approach**: Add a new `describe('cascade behavior', ...)` block:\n1. Create a project, add 2 tasks, assign a label to one task\n2. DELETE the project\n3. Verify GET /api/tasks (all) no longer contains those tasks\n4. Verify the label itself still exists (only task_labels rows deleted, not the label)\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 1-2 new tests verifying cascade; suite still green.",
+    "updatedAt": "2026-08-28T05:57:39.353Z"
   },
   "feedback": {
-    "taskId": 36,
-    "content": "Task verified. Findings:\n\n- 9 tests in `api/src/routes/smart-lists.test.ts` cover all required scenarios: all tasks with `project_name`/`labels`, sort order (incomplete-first then title, verified via exact id sequence), completed-only filter (including empty case), label filter (single project + cross-project), and both 400 cases (`labelId=9999` unknown, `labelId=abc` malformed) — exceeds the 6+ minimum.\n- Every assertion (status codes, error message bodies, response shapes) matches the actual `api/src/routes/tasks.ts` source, not just the dev's memory claims.\n- `npm run build -w api` clean; `npm run test -w api` green across 3 repeated runs (58 tests, no flakiness) — confirms the existing `fileParallelism: false` fix already covers this 4th shared-DB test file.\n- Diff scoped to exactly the new test file plus routine `ralph/task-status.json`/`memory.md` bookkeeping; no production code changed (correct, since this task is test-only).\n\nNo new learnings worth adding to memory — this task matched the pattern already documented from the prior route-test tasks exactly, including the dev's own note being accurate.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T05:54:03.428Z"
+    "taskId": 37,
+    "content": "<status>verified</status>\n",
+    "updatedAt": "2026-08-28T05:59:38.334Z"
   },
-  "lastUpdated": "2026-08-28T05:54:03.430Z"
+  "lastUpdated": "2026-08-28T05:59:38.335Z"
 }

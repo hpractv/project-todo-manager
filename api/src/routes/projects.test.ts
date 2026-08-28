@@ -8,6 +8,9 @@ import { db } from '../db/index.js';
 const TEST_DB_PATH = path.resolve(process.cwd(), process.env.DB_PATH ?? './data/test.db');
 
 beforeEach(() => {
+  db.exec('DELETE FROM task_labels');
+  db.exec('DELETE FROM labels');
+  db.exec('DELETE FROM tasks');
   db.exec('DELETE FROM projects');
 });
 
@@ -145,5 +148,43 @@ describe('DELETE /api/projects/:id', () => {
 
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: 'project not found' });
+  });
+});
+
+describe('cascade behavior', () => {
+  it('deleting a project removes its tasks and their task_labels rows, but keeps the label', async () => {
+    const project = await request(app).post('/api/projects').send({ name: 'Cascade Project' });
+    const projectId = project.body.id;
+
+    const task1 = await request(app)
+      .post(`/api/projects/${projectId}/tasks`)
+      .send({ title: 'Task One' });
+    const task2 = await request(app)
+      .post(`/api/projects/${projectId}/tasks`)
+      .send({ title: 'Task Two' });
+    const task1Id = task1.body.id;
+    const task2Id = task2.body.id;
+
+    const label = await request(app).post('/api/labels').send({ name: 'Urgent' });
+    const labelId = label.body.id;
+
+    await request(app).put(`/api/tasks/${task1Id}/labels`).send({ label_ids: [labelId] });
+
+    const deleteRes = await request(app).delete(`/api/projects/${projectId}`);
+    expect(deleteRes.status).toBe(204);
+
+    const allTasks = await request(app).get('/api/tasks');
+    const remainingIds = allTasks.body.map((task: { id: number }) => task.id);
+    expect(remainingIds).not.toContain(task1Id);
+    expect(remainingIds).not.toContain(task2Id);
+
+    const taskLabelRows = db
+      .prepare('SELECT * FROM task_labels WHERE task_id = ?')
+      .all(task1Id);
+    expect(taskLabelRows).toEqual([]);
+
+    const labelRes = await request(app).get(`/api/labels/${labelId}`);
+    expect(labelRes.status).toBe(200);
+    expect(labelRes.body).toMatchObject({ id: labelId, name: 'Urgent' });
   });
 });
