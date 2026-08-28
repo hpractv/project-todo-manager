@@ -359,29 +359,20 @@
       "devIterations": 2,
       "createdAt": "2026-08-28T15:25:31.040Z",
       "updatedAt": "2026-08-28T15:57:53.382Z"
-    },
-    {
-      "id": 41,
-      "title": "Document test suite in README with offline note",
-      "description": "What/Why: The epic's `single-command-suite` todo requires the README to document 'a single command runs the full api + web suite green with no network access'. The README currently lists `npm run test` but doesn't explicitly state the offline capability or summarize test coverage.\n\nFiles:\n- `README.md` — add a Testing section\n\nApproach:\n1. Add a `## Testing` section after Development in README.md\n2. Document: `npm run test` runs the full API (59 tests) + web (36 tests) suite\n3. Explicitly state: 'Tests run entirely offline — no network access required. API tests use a local test database; web tests mock the API client.'\n4. Note that tests must pass before merging.\n\nTests: Verify README renders correctly; re-run `npm run test` to confirm count.\n\nAcceptance:\n- README has a Testing section documenting the single-command test suite\n- The 'no network access' aspect is explicitly stated\n- Test count is accurate (verify via `npm run test` output)",
-      "status": "backlog",
-      "devIterations": 0,
-      "createdAt": "2026-08-28T15:25:31.040Z",
-      "updatedAt": "2026-08-28T15:25:31.040Z"
     }
   ],
   "currentTaskNum": 40,
-  "totalLLMCalls": 5,
+  "totalLLMCalls": 6,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 40,
-    "content": "## Task: Add task row enter/exit animations\n\nWhat/Why: The epic's `interaction-animations` todo requires 'smooth add/remove row animations for tasks'. Check-off transitions and hover/active states are already implemented in `task-row.css`, but there are no CSS animations for rows entering or exiting the task list.\n\nFiles:\n- `web/src/styles/task-row.css` — add `@keyframes` for fade-in/slide-in on row mount\n- `web/src/features/tasks/TaskList.tsx` — apply animation class to new rows; for exit, consider simple opacity fade before removal or use react-transition-group if needed\n\nApproach:\n1. Add `@keyframes task-row-enter` with a subtle fade+slide effect (opacity 0->1, translateY 4px->0, ~150ms ease-out) to `task-row.css`\n2. Apply the animation to `.task-row` via `animation: task-row-enter 0.15s ease-out`\n3. For exit: either accept instant removal (simplest, acceptable for MVP) or wrap task list in a transition group. Start with instant removal unless it feels jarring.\n4. Verify enter animation fires on task create and doesn't replay on filter/sort changes by testing manually.\n\nTests: `npm run build -w web` clean; `npm run test -w web` green (no test file needed for CSS-only change); manual browser verification that new tasks animate in smoothly.\n\nAcceptance:\n- Adding a task shows a smooth fade-in/slide-in animation (not instant pop-in)\n- Filter/sort changes don't trigger re-animation on already-visible rows\n- `npm run build` passes",
-    "updatedAt": "2026-08-28T15:25:31.045Z"
+    "taskId": null,
+    "content": "",
+    "updatedAt": "2026-08-28T16:00:15.179Z"
   },
   "feedback": {
-    "taskId": 40,
-    "content": "The task is complete and correct. Summary of verification:\n\n- `npm run build` (root, both workspaces) and `npm run test` (root, both workspaces — 36 web tests, all API tests) are green.\n- Live browser verification (headless Chrome + puppeteer-core against the real dev server, not just jsdom) confirms: a newly created task row gets `task-row--enter` immediately, the animation plays for its full ~150ms duration before the class is removed (~200ms settle), a subsequent sort-order change does not re-trigger the animation on the already-visible row, and creating a second task animates only that new row while the first stays static.\n- This confirms the fix already recorded in `ralph/memory.md` (task 40's original render-based \"seen ids\" approach was found broken by QA — `setTaskLabels` firing right after `createTask` stripped the animation class mid-flight — and was replaced with the current time-based `setTimeout`/`seenTaskIds` scheme) genuinely holds in the real create-task flow, not just in isolation.\n- No exit animation was added; per the task's own instructions, instant removal is an acceptable MVP choice, and that's what's implemented.\n- Cleaned up all scratch processes/DB files used for verification; only the intended files are in the diff.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T15:57:53.380Z"
+    "taskId": null,
+    "content": "",
+    "updatedAt": "2026-08-28T16:00:15.179Z"
   },
-  "lastUpdated": "2026-08-28T15:57:53.382Z"
+  "lastUpdated": "2026-08-28T16:00:15.179Z"
 }
