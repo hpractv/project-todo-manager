@@ -148,10 +148,10 @@
       "id": 17,
       "title": "Add tasks data-access layer",
       "description": "Add api/src/types/task.ts and api/src/db/tasks.ts with typed functions for task CRUD.\n\n**What/Why:** REQ-032-036 require task operations. Data-access layer provides typed functions for the REST routes.\n\n**Files:**\n- `api/src/types/task.ts` (new) — Task interface\n- `api/src/db/tasks.ts` (new) — Prepared statements and functions\n\n**Task interface:**\n```ts\ninterface Task {\n  id: number;\n  project_id: number;\n  title: string;\n  note: string | null;\n  completed: boolean; // converted from INTEGER at boundary\n  sort_order: number | null;\n  created_at: string;\n  updated_at: string;\n}\n```\n\n**Functions:**\n- `createTask(projectId: number, title: string, note?: string): Task`\n- `listTasksByProject(projectId: number): Task[]`\n- `getTask(id: number): Task | undefined`\n- `updateTask(id: number, data: { title?: string; note?: string; completed?: boolean }): Task | undefined`\n- `deleteTask(id: number): boolean`\n- `countTasksByProject(projectId: number): number`\n\n**Approach:** Use prepared statements with named params. Convert `completed` INTEGER 0/1 to/from boolean at the boundary (read: `!!row.completed`, write: `completed ? 1 : 0`). Update `updated_at` on every updateTask call.\n\n**Tests to run:** `npm run build -w api` compiles cleanly.\n\n**Acceptance:** All 6 functions exist, return typed results, boolean conversion works correctly, build passes.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T03:44:34.095Z"
+      "updatedAt": "2026-08-28T03:51:29.461Z"
     },
     {
       "id": 18,
@@ -388,18 +388,18 @@
       "updatedAt": "2026-08-28T03:44:34.095Z"
     }
   ],
-  "currentTaskNum": 16,
-  "totalLLMCalls": 1,
+  "currentTaskNum": 17,
+  "totalLLMCalls": 3,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 16,
-    "content": "## Task: Add tasks table to schema\n\nAdd tasks table via additive idempotent CREATE TABLE IF NOT EXISTS in initSchema.\n\n**What/Why:** REQ-030-036 require tasks. The tasks table stores todos within projects with title, note, completion status, and sort order.\n\n**Files:**\n- `api/src/db/index.ts` — Add tasks table creation to initSchema()\n\n**Schema:**\n```sql\nCREATE TABLE IF NOT EXISTS tasks (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,\n  title TEXT NOT NULL,\n  note TEXT,\n  completed INTEGER DEFAULT 0,\n  sort_order INTEGER,\n  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n);\n```\n\n**Approach:** Add the CREATE TABLE statement after the projects table creation. The ON DELETE CASCADE ensures tasks are deleted when their parent project is deleted. `completed` uses INTEGER 0/1 since SQLite has no boolean type — convert at API boundary.\n\n**Tests to run:** `npm run build -w api`, start server, verify no errors, check .tables in sqlite3 CLI shows tasks table.\n\n**Acceptance:** tasks table exists with all columns, foreign key to projects, cascade delete configured, schema is idempotent (multiple restarts don't error).",
-    "updatedAt": "2026-08-28T03:47:53.660Z"
+    "taskId": 17,
+    "content": "## Task: Add tasks data-access layer\n\nAdd api/src/types/task.ts and api/src/db/tasks.ts with typed functions for task CRUD.\n\n**What/Why:** REQ-032-036 require task operations. Data-access layer provides typed functions for the REST routes.\n\n**Files:**\n- `api/src/types/task.ts` (new) — Task interface\n- `api/src/db/tasks.ts` (new) — Prepared statements and functions\n\n**Task interface:**\n```ts\ninterface Task {\n  id: number;\n  project_id: number;\n  title: string;\n  note: string | null;\n  completed: boolean; // converted from INTEGER at boundary\n  sort_order: number | null;\n  created_at: string;\n  updated_at: string;\n}\n```\n\n**Functions:**\n- `createTask(projectId: number, title: string, note?: string): Task`\n- `listTasksByProject(projectId: number): Task[]`\n- `getTask(id: number): Task | undefined`\n- `updateTask(id: number, data: { title?: string; note?: string; completed?: boolean }): Task | undefined`\n- `deleteTask(id: number): boolean`\n- `countTasksByProject(projectId: number): number`\n\n**Approach:** Use prepared statements with named params. Convert `completed` INTEGER 0/1 to/from boolean at the boundary (read: `!!row.completed`, write: `completed ? 1 : 0`). Update `updated_at` on every updateTask call.\n\n**Tests to run:** `npm run build -w api` compiles cleanly.\n\n**Acceptance:** All 6 functions exist, return typed results, boolean conversion works correctly, build passes.",
+    "updatedAt": "2026-08-28T03:49:27.525Z"
   },
   "feedback": {
-    "taskId": 16,
-    "content": "# QA Result: Task #16 — Add tasks table to schema\n\nVerified against `api/src/db/index.ts`:\n- Schema matches the spec exactly: all columns, types, defaults, `REFERENCES projects(id) ON DELETE CASCADE`.\n- `npm run build -w api` compiles cleanly.\n- Confirmed via live SQLite inspection (`sqlite3 .tables`, `.schema tasks`, `PRAGMA foreign_key_list`) that the table and FK are correctly created.\n- Confirmed idempotency: restarting the compiled server against the same DB file (re-running `initSchema()`) causes no error.\n- Confirmed the cascade actually fires at runtime (not just declared): inserted a project + task, deleted the project via the app's own `better-sqlite3` connection with `foreign_keys = ON`, and the task row was removed.\n- Existing `api` test suite (13 tests) still passes unaffected.\n- Diff scope matches the task exactly — schema-only change, no premature data-access/route code, nothing missing.\n\nNoted in `ralph/memory.md`: the working tree also has unrelated, pre-existing uncommitted changes (port 3001→3101, CORS rewrite, Vite proxy tweaks, README) outside task 16's file list — not part of this task, not flagged here, but recorded so future QA doesn't misattribute them.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T03:49:27.494Z"
+    "taskId": 17,
+    "content": "# Feedback\nNone — implementation matches the spec, builds cleanly, and functional behavior verified end-to-end.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T03:51:29.459Z"
   },
-  "lastUpdated": "2026-08-28T03:49:27.497Z"
+  "lastUpdated": "2026-08-28T03:51:29.461Z"
 }
