@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import projectsRouter from './routes/projects.js';
 import tasksRouter from './routes/tasks.js';
+import labelsRouter from './routes/labels.js';
 
 const app = express();
 
@@ -33,5 +34,6 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/projects', projectsRouter);
 app.use('/api', tasksRouter);
+app.use('/api/labels', labelsRouter);
 
 export default app;

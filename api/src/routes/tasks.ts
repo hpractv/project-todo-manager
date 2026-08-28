@@ -7,8 +7,20 @@ import {
   deleteTask,
 } from '../db/tasks.js';
 import { getProject } from '../db/projects.js';
+import {
+  listLabelsForTask,
+  getLabel,
+  assignLabelToTask,
+  removeLabelFromTask,
+} from '../db/labels.js';
+import type { Task } from '../types/task.js';
+import type { Label } from '../types/label.js';
 
 const router = Router();
+
+function withLabels(task: Task): Task & { labels: Label[] } {
+  return { ...task, labels: listLabelsForTask(task.id) };
+}
 
 router.post('/projects/:projectId/tasks', (req, res) => {
   const projectId = Number(req.params.projectId);
@@ -27,7 +39,7 @@ router.post('/projects/:projectId/tasks', (req, res) => {
   }
 
   const task = createTask(projectId, title, note);
-  res.status(201).json(task);
+  res.status(201).json(withLabels(task));
 });
 
 router.get('/projects/:projectId/tasks', (req, res) => {
@@ -39,7 +51,7 @@ router.get('/projects/:projectId/tasks', (req, res) => {
     return;
   }
 
-  res.json(listTasksByProject(projectId));
+  res.json(listTasksByProject(projectId).map(withLabels));
 });
 
 router.get('/tasks/:id', (req, res) => {
@@ -50,7 +62,7 @@ router.get('/tasks/:id', (req, res) => {
     return;
   }
 
-  res.json(task);
+  res.json(withLabels(task));
 });
 
 router.put('/tasks/:id', (req, res) => {
@@ -73,7 +85,40 @@ router.put('/tasks/:id', (req, res) => {
     return;
   }
 
-  res.json(task);
+  res.json(withLabels(task));
+});
+
+router.put('/tasks/:id/labels', (req, res) => {
+  const taskId = Number(req.params.id);
+  const task = getTask(taskId);
+
+  if (!task) {
+    res.status(404).json({ error: 'task not found' });
+    return;
+  }
+
+  const { label_ids } = req.body ?? {};
+
+  if (!Array.isArray(label_ids) || !label_ids.every((id) => typeof id === 'number')) {
+    res.status(400).json({ error: 'label_ids must be an array of numbers' });
+    return;
+  }
+
+  for (const labelId of label_ids) {
+    if (!getLabel(labelId)) {
+      res.status(400).json({ error: `label ${labelId} not found` });
+      return;
+    }
+  }
+
+  for (const label of listLabelsForTask(taskId)) {
+    removeLabelFromTask(taskId, label.id);
+  }
+  for (const labelId of label_ids) {
+    assignLabelToTask(taskId, labelId);
+  }
+
+  res.json(withLabels(task));
 });
 
 router.delete('/tasks/:id', (req, res) => {
