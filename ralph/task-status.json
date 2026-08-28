@@ -211,10 +211,10 @@
       "id": 24,
       "title": "Labels data-access layer",
       "description": "**What/why:** Add typed functions for label CRUD and label-task assignment, mirroring the tasks.ts pattern.\n\n**Files:**\n- `api/src/types/label.ts` (new)\n- `api/src/db/labels.ts` (new)\n\n**Approach:**\n1. `api/src/types/label.ts`: `interface Label { id: number; name: string; color: string | null; }`.\n2. `api/src/db/labels.ts` prepared statements + functions:\n   - `createLabel(name, color?)` - insert + re-fetch\n   - `listLabels()` - all labels ordered by id\n   - `getLabel(id)` - single label or undefined\n   - `updateLabel(id, { name?, color? })` - partial update pattern\n   - `deleteLabel(id)` - returns boolean\n   - `assignLabelToTask(taskId, labelId)` - INSERT OR IGNORE into task_labels\n   - `removeLabelFromTask(taskId, labelId)` - DELETE from task_labels\n   - `listLabelsForTask(taskId)` - returns Label[] for a task\n   - `listTaskIdsForLabel(labelId)` - returns number[] for filter use\n\n**Tests to run:** `npm run build -w api`, `npm run test -w api`, manual smoke script verifying all 9 functions (create/list/get/update/delete/assign/remove/listForTask/listForLabel).\n\n**Acceptance:**\n- All functions work correctly with boundary values.\n- Assigning same label twice is idempotent (OR IGNORE).\n- `listLabelsForTask` returns empty array for task with no labels.\n- Delete label removes join rows, tasks remain (AC-039 prep).",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:09:55.534Z"
+      "updatedAt": "2026-08-28T04:26:59.654Z"
     },
     {
       "id": 25,
@@ -325,18 +325,18 @@
       "updatedAt": "2026-08-28T04:09:55.534Z"
     }
   ],
-  "currentTaskNum": 23,
-  "totalLLMCalls": 17,
+  "currentTaskNum": 24,
+  "totalLLMCalls": 19,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 23,
-    "content": "## Task: Labels + task_labels schema\n\n**What/why:** Add the labels table and task_labels join table to initSchema, enabling Phase 2's unified label system.\n\n**Files:**\n- `api/src/db/index.ts` (append two CREATE TABLE IF NOT EXISTS statements)\n\n**Approach:**\n1. Add `labels` table: `id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, color TEXT`.\n2. Add `task_labels` join table: `task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE, label_id INTEGER REFERENCES labels(id) ON DELETE CASCADE, PRIMARY KEY(task_id, label_id)`.\n3. Both tables are additive/idempotent (IF NOT EXISTS pattern matches existing projects/tasks tables).\n4. No UNIQUE constraint on labels.name - allows duplicate label names if desired (or add UNIQUE if product decision differs).\n\n**Tests to run:** `npm run build -w api`, `npm run test -w api` (existing 13 tests still pass), manual sqlite3 verification (`.tables`, `.schema labels`, `.schema task_labels`, PRAGMA foreign_key_list, delete-cascade verification).\n\n**Acceptance:**\n- Schema matches spec exactly.\n- Idempotent - second server start against same DB is a no-op.\n- Deleting a label cascades to remove task_labels rows but not tasks.\n- Deleting a task cascades to remove its task_labels rows.",
-    "updatedAt": "2026-08-28T04:18:00.577Z"
+    "taskId": 24,
+    "content": "## Task: Labels data-access layer\n\n**What/why:** Add typed functions for label CRUD and label-task assignment, mirroring the tasks.ts pattern.\n\n**Files:**\n- `api/src/types/label.ts` (new)\n- `api/src/db/labels.ts` (new)\n\n**Approach:**\n1. `api/src/types/label.ts`: `interface Label { id: number; name: string; color: string | null; }`.\n2. `api/src/db/labels.ts` prepared statements + functions:\n   - `createLabel(name, color?)` - insert + re-fetch\n   - `listLabels()` - all labels ordered by id\n   - `getLabel(id)` - single label or undefined\n   - `updateLabel(id, { name?, color? })` - partial update pattern\n   - `deleteLabel(id)` - returns boolean\n   - `assignLabelToTask(taskId, labelId)` - INSERT OR IGNORE into task_labels\n   - `removeLabelFromTask(taskId, labelId)` - DELETE from task_labels\n   - `listLabelsForTask(taskId)` - returns Label[] for a task\n   - `listTaskIdsForLabel(labelId)` - returns number[] for filter use\n\n**Tests to run:** `npm run build -w api`, `npm run test -w api`, manual smoke script verifying all 9 functions (create/list/get/update/delete/assign/remove/listForTask/listForLabel).\n\n**Acceptance:**\n- All functions work correctly with boundary values.\n- Assigning same label twice is idempotent (OR IGNORE).\n- `listLabelsForTask` returns empty array for task with no labels.\n- Delete label removes join rows, tasks remain (AC-039 prep).",
+    "updatedAt": "2026-08-28T04:24:26.923Z"
   },
   "feedback": {
-    "taskId": 23,
-    "content": "# QA Result\n\nTask #23 (Labels + task_labels schema) verified:\n\n- `api/src/db/index.ts` diff is scoped exactly as specified: two additive `CREATE TABLE IF NOT EXISTS` statements (`labels`, `task_labels`) appended after `tasks`, matching the spec's column definitions and FK cascade behavior exactly.\n- `npm run build -w api` compiles cleanly.\n- `npm run test -w api` — existing 13 tests pass, unaffected.\n- Idempotency confirmed: started the compiled server twice against the same DB file; second start is a no-op with no errors.\n- Cascade behavior confirmed directly against the DB: deleting a label removes only its `task_labels` rows (task itself untouched, other label assignments intact); deleting a task removes its remaining `task_labels` rows.\n- No leftover scratch files in git status.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T04:24:26.904Z"
+    "taskId": 24,
+    "content": "All acceptance criteria verified: build clean, existing tests unaffected, and all 9 functions behave correctly at runtime (partial updates, idempotent assignment, empty-array cases, and delete-removes-join-rows-not-tasks).\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T04:26:59.652Z"
   },
-  "lastUpdated": "2026-08-28T04:24:26.907Z"
+  "lastUpdated": "2026-08-28T04:26:59.654Z"
 }
