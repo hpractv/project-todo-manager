@@ -310,10 +310,10 @@
       "id": 35,
       "title": "Add API integration tests for labels and label assignment",
       "description": "**What/Why**: The epic's `api-tests` todo requires tests for labels CRUD and label assignment to tasks, plus cascade behavior when a label is deleted.\n\n**Files**: `api/src/routes/labels.test.ts` (new)\n\n**Approach**: Same vitest+supertest pattern as tasks tests. Cover:\n- POST /api/labels: create with name only, create with color, 400 missing name\n- GET /api/labels: list all\n- GET /api/labels/:id: found, 404 not found\n- PUT /api/labels/:id: partial update name, partial update color, 400 empty name string, 404 not found\n- DELETE /api/labels/:id: success removes label, 404 already deleted\n- PUT /api/tasks/:id/labels: set labels, 400 non-existent label id leaves task unchanged, 400 non-array body, 404 unknown task\n- Deleting a label removes it from tasks' label arrays but tasks remain\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 12+ tests covering label CRUD, label assignment endpoint, and cascade behavior; all green.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T05:45:44.659Z"
+      "updatedAt": "2026-08-28T05:51:55.035Z"
     },
     {
       "id": 36,
@@ -379,18 +379,18 @@
       "updatedAt": "2026-08-28T05:45:44.659Z"
     }
   ],
-  "currentTaskNum": 34,
-  "totalLLMCalls": 45,
+  "currentTaskNum": 35,
+  "totalLLMCalls": 47,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 34,
-    "content": "## Task: Add API integration tests for tasks endpoints\n\n**What/Why**: The epic's `api-tests` todo requires tests for tasks CRUD, but only `api/src/routes/projects.test.ts` exists. Tasks REST routes need coverage for happy paths and error cases.\n\n**Files**: `api/src/routes/tasks.test.ts` (new)\n\n**Approach**: Mirror the pattern in `projects.test.ts`: use vitest with supertest, scratch `DB_PATH` via vitest config `test.env`, `beforeEach` truncate, `afterAll` cleanup. Cover:\n- POST /api/projects/:projectId/tasks: create with title only, create with note, 400 missing title, 404 unknown project\n- GET /api/projects/:projectId/tasks: list returns array, 404 unknown project\n- GET /api/tasks/:id: found, 404 not found\n- PUT /api/tasks/:id: partial update title, partial update completed (boolean conversion), 400 invalid completed type, 404 not found\n- DELETE /api/tasks/:id: success, 404 already deleted\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 10+ tests covering all 5 endpoints' happy paths and error branches; all green.",
-    "updatedAt": "2026-08-28T05:45:44.664Z"
+    "taskId": 35,
+    "content": "## Task: Add API integration tests for labels and label assignment\n\n**What/Why**: The epic's `api-tests` todo requires tests for labels CRUD and label assignment to tasks, plus cascade behavior when a label is deleted.\n\n**Files**: `api/src/routes/labels.test.ts` (new)\n\n**Approach**: Same vitest+supertest pattern as tasks tests. Cover:\n- POST /api/labels: create with name only, create with color, 400 missing name\n- GET /api/labels: list all\n- GET /api/labels/:id: found, 404 not found\n- PUT /api/labels/:id: partial update name, partial update color, 400 empty name string, 404 not found\n- DELETE /api/labels/:id: success removes label, 404 already deleted\n- PUT /api/tasks/:id/labels: set labels, 400 non-existent label id leaves task unchanged, 400 non-array body, 404 unknown task\n- Deleting a label removes it from tasks' label arrays but tasks remain\n\n**Tests to run**: `npm run test -w api`\n\n**Acceptance**: 12+ tests covering label CRUD, label assignment endpoint, and cascade behavior; all green.",
+    "updatedAt": "2026-08-28T05:48:52.266Z"
   },
   "feedback": {
-    "taskId": 34,
-    "content": "The task is complete and correct: `api/src/routes/tasks.test.ts` adds 18 tests covering all 5 tasks endpoints' happy paths and error branches (well above the 10+ requirement), the `api/vitest.config.ts` `fileParallelism: false` change is a legitimate fix for a real cross-file DB race between `projects.test.ts` and `tasks.test.ts` (confirmed stable across 4 repeated runs), `npm run build -w api` is clean, and the full suite (api 31 tests, web 34 tests) is green with no regressions.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T05:48:52.248Z"
+    "taskId": 35,
+    "content": "<status>verified</status>\n",
+    "updatedAt": "2026-08-28T05:51:55.034Z"
   },
-  "lastUpdated": "2026-08-28T05:48:52.251Z"
+  "lastUpdated": "2026-08-28T05:51:55.035Z"
 }
