@@ -5,6 +5,9 @@ import {
   getTask,
   updateTask,
   deleteTask,
+  listAllTasks,
+  listCompletedTasks,
+  listTasksByLabel,
 } from '../db/tasks.js';
 import { getProject } from '../db/projects.js';
 import {
@@ -18,7 +21,7 @@ import type { Label } from '../types/label.js';
 
 const router = Router();
 
-function withLabels(task: Task): Task & { labels: Label[] } {
+function withLabels<T extends Task>(task: T): T & { labels: Label[] } {
   return { ...task, labels: listLabelsForTask(task.id) };
 }
 
@@ -52,6 +55,29 @@ router.get('/projects/:projectId/tasks', (req, res) => {
   }
 
   res.json(listTasksByProject(projectId).map(withLabels));
+});
+
+router.get('/tasks', (req, res) => {
+  const { labelId, completed } = req.query;
+
+  if (labelId !== undefined) {
+    const parsedLabelId = Number(labelId);
+
+    if (!Number.isInteger(parsedLabelId) || !getLabel(parsedLabelId)) {
+      res.status(400).json({ error: 'labelId must reference an existing label' });
+      return;
+    }
+
+    res.json(listTasksByLabel(parsedLabelId).map(withLabels));
+    return;
+  }
+
+  if (completed === 'true') {
+    res.json(listCompletedTasks().map(withLabels));
+    return;
+  }
+
+  res.json(listAllTasks().map(withLabels));
 });
 
 router.get('/tasks/:id', (req, res) => {

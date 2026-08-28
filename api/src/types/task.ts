@@ -8,3 +8,7 @@ export interface Task {
   created_at: string;
   updated_at: string;
 }
+
+export interface TaskWithProject extends Task {
+  project_name: string;
+}

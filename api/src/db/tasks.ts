@@ -1,5 +1,5 @@
 import { db } from './index.js';
-import type { Task } from '../types/task.js';
+import type { Task, TaskWithProject } from '../types/task.js';
 
 interface TaskRow {
   id: number;
@@ -12,8 +12,16 @@ interface TaskRow {
   updated_at: string;
 }
 
+interface TaskWithProjectRow extends TaskRow {
+  project_name: string | null;
+}
+
 function toTask(row: TaskRow): Task {
   return { ...row, completed: !!row.completed };
+}
+
+function toTaskWithProject(row: TaskWithProjectRow): TaskWithProject {
+  return { ...toTask(row), project_name: row.project_name ?? '' };
 }
 
 const insertStmt = db.prepare<{ project_id: number; title: string; note: string | null }>(
@@ -30,6 +38,30 @@ const deleteStmt = db.prepare<{ id: number }>('DELETE FROM tasks WHERE id = @id'
 
 const countByProjectStmt = db.prepare<{ project_id: number }>(
   'SELECT COUNT(*) AS count FROM tasks WHERE project_id = @project_id',
+);
+
+const selectAllWithProjectStmt = db.prepare(
+  `SELECT tasks.*, projects.name AS project_name
+   FROM tasks
+   LEFT JOIN projects ON projects.id = tasks.project_id
+   ORDER BY tasks.completed ASC, tasks.title ASC`,
+);
+
+const selectCompletedWithProjectStmt = db.prepare(
+  `SELECT tasks.*, projects.name AS project_name
+   FROM tasks
+   LEFT JOIN projects ON projects.id = tasks.project_id
+   WHERE tasks.completed = 1
+   ORDER BY tasks.completed ASC, tasks.title ASC`,
+);
+
+const selectByLabelWithProjectStmt = db.prepare<{ label_id: number }>(
+  `SELECT tasks.*, projects.name AS project_name
+   FROM tasks
+   LEFT JOIN projects ON projects.id = tasks.project_id
+   JOIN task_labels ON task_labels.task_id = tasks.id
+   WHERE task_labels.label_id = @label_id
+   ORDER BY tasks.completed ASC, tasks.title ASC`,
 );
 
 export function createTask(projectId: number, title: string, note?: string): Task {
@@ -77,4 +109,19 @@ export function deleteTask(id: number): boolean {
 export function countTasksByProject(projectId: number): number {
   const row = countByProjectStmt.get({ project_id: projectId }) as { count: number };
   return row.count;
+}
+
+export function listAllTasks(): TaskWithProject[] {
+  const rows = selectAllWithProjectStmt.all() as TaskWithProjectRow[];
+  return rows.map(toTaskWithProject);
+}
+
+export function listCompletedTasks(): TaskWithProject[] {
+  const rows = selectCompletedWithProjectStmt.all() as TaskWithProjectRow[];
+  return rows.map(toTaskWithProject);
+}
+
+export function listTasksByLabel(labelId: number): TaskWithProject[] {
+  const rows = selectByLabelWithProjectStmt.all({ label_id: labelId }) as TaskWithProjectRow[];
+  return rows.map(toTaskWithProject);
 }
