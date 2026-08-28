@@ -184,10 +184,10 @@
       "id": 21,
       "title": "Add tasksSlice with async thunks",
       "description": "What/Why: Redux state management for tasks is required per epic. No slice exists yet.\n\nFiles: `web/src/store/tasksSlice.ts`, `web/src/store/index.ts`.\n\nApproach:\n- Create `tasksSlice.ts` following `projectsSlice.ts` pattern: state shape `{ tasks: Task[], loading, error, currentProjectId }`, async thunks for fetchTasksByProject, createTask, updateTask, toggleComplete (calls updateTask with flipped completed), deleteTask.\n- Register the reducer in `index.ts`.\n- Export selectors: selectTasks, selectTasksLoading, selectTasksError.\n\nTests: `npm run build -w web` compiles. SSR module loader smoke test (per memory note from task 9) can dispatch thunks and verify state shape.\n\nAcceptance: Slice registered in store; thunks correctly call API client; state updates on fulfilled/rejected; typed correctly.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T03:57:45.692Z"
+      "updatedAt": "2026-08-28T04:07:05.323Z"
     },
     {
       "id": 22,
@@ -370,18 +370,18 @@
       "updatedAt": "2026-08-28T03:57:45.692Z"
     }
   ],
-  "currentTaskNum": 20,
-  "totalLLMCalls": 10,
+  "currentTaskNum": 21,
+  "totalLLMCalls": 12,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 20,
-    "content": "## Task: Add Task types and API client methods to web\n\nWhat/Why: The web app needs to call the tasks API endpoints. No task types or client methods exist yet.\n\nFiles: `web/src/api/types.ts`, `web/src/api/client.ts`.\n\nApproach:\n- In `types.ts`: Add `Task` interface (id, project_id, title, note: string|null, completed: boolean, sort_order, created_at, updated_at) and `TaskInput` (title required, note optional).\n- In `client.ts`: Add functions `fetchTasks(projectId)`, `createTask(projectId, data)`, `updateTask(id, data)`, `deleteTask(id)` following the existing project client pattern.\n\nTests: `npm run build -w web` must compile cleanly. Manual: call each client method from a scratch script or browser console against a running API.\n\nAcceptance: Types match API response shapes; all 4 client methods correctly call the API and return typed data; build passes.",
-    "updatedAt": "2026-08-28T04:01:56.796Z"
+    "taskId": 21,
+    "content": "## Task: Add tasksSlice with async thunks\n\nWhat/Why: Redux state management for tasks is required per epic. No slice exists yet.\n\nFiles: `web/src/store/tasksSlice.ts`, `web/src/store/index.ts`.\n\nApproach:\n- Create `tasksSlice.ts` following `projectsSlice.ts` pattern: state shape `{ tasks: Task[], loading, error, currentProjectId }`, async thunks for fetchTasksByProject, createTask, updateTask, toggleComplete (calls updateTask with flipped completed), deleteTask.\n- Register the reducer in `index.ts`.\n- Export selectors: selectTasks, selectTasksLoading, selectTasksError.\n\nTests: `npm run build -w web` compiles. SSR module loader smoke test (per memory note from task 9) can dispatch thunks and verify state shape.\n\nAcceptance: Slice registered in store; thunks correctly call API client; state updates on fulfilled/rejected; typed correctly.",
+    "updatedAt": "2026-08-28T04:03:53.481Z"
   },
   "feedback": {
-    "taskId": 20,
-    "content": "# QA Result\n\nTask 20 is complete and correct.\n\n- `web/src/api/types.ts`: `Task` and `TaskInput` match the API's actual response/request shapes exactly (mirrors `api/src/types/task.ts`).\n- `web/src/api/client.ts`: `fetchTasks`, `createTask`, `updateTask`, `deleteTask` follow the existing `request<T>` pattern from the project client functions; `updateTask`'s partial-update typing correctly reflects the tasks route's true partial-PUT semantics (title/note/completed all optional).\n- `npm run build -w web` — clean, no type errors.\n- `npm run test -w web` (3 tests) and `npm run test -w api` (13 tests) — both green, unaffected.\n- Diff is scoped to exactly the two files named in the task; no stray changes.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T04:03:53.462Z"
+    "taskId": 21,
+    "content": "The task is complete: `tasksSlice.ts` follows the established `projectsSlice.ts` pattern, all required thunks/selectors exist, it's registered in `store/index.ts`, tests are meaningful (7 tests covering happy paths and an error case), and both `npm run build -w web` and the full test suites (web: 10/10, api: 13/13) pass with no regressions.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T04:07:05.319Z"
   },
-  "lastUpdated": "2026-08-28T04:03:53.464Z"
+  "lastUpdated": "2026-08-28T04:07:05.323Z"
 }
