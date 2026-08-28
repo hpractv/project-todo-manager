@@ -157,10 +157,10 @@
       "id": 18,
       "title": "Add tasks REST routes",
       "description": "Add api/src/routes/tasks.ts with endpoints for task CRUD within projects.\n\n**What/Why:** REQ-032-036 require REST endpoints for tasks. Routes wire data-access to HTTP.\n\n**Files:**\n- `api/src/routes/tasks.ts` (new) — Express router with task endpoints\n- `api/src/server.ts` — Import and mount tasks router\n\n**Endpoints:**\n- `POST /api/projects/:projectId/tasks` — Create task (400 if title missing, 404 if project not found)\n- `GET /api/projects/:projectId/tasks` — List tasks for project (404 if project not found)\n- `GET /api/tasks/:id` — Get single task (404 if not found)\n- `PUT /api/tasks/:id` — Update task title/note/completed (404 if not found)\n- `DELETE /api/tasks/:id` — Delete task (204 on success, 404 if not found)\n\n**Approach:** Create Router, use data-access functions from db/tasks.ts, check project exists before create/list. Match 400/404 error JSON format from projects routes. Mount at `/api` base in server.ts (routes use full paths like `/projects/:projectId/tasks`).\n\n**Tests to run:** `npm run build -w api`, manual curl testing for each endpoint.\n\n**Acceptance:** All 5 endpoints work, 400 for missing title, 404 for unknown project/task, task CRUD persists to DB.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T03:44:34.095Z"
+      "updatedAt": "2026-08-28T03:55:23.468Z"
     },
     {
       "id": 19,
@@ -388,18 +388,18 @@
       "updatedAt": "2026-08-28T03:44:34.095Z"
     }
   ],
-  "currentTaskNum": 17,
-  "totalLLMCalls": 3,
+  "currentTaskNum": 18,
+  "totalLLMCalls": 5,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 17,
-    "content": "## Task: Add tasks data-access layer\n\nAdd api/src/types/task.ts and api/src/db/tasks.ts with typed functions for task CRUD.\n\n**What/Why:** REQ-032-036 require task operations. Data-access layer provides typed functions for the REST routes.\n\n**Files:**\n- `api/src/types/task.ts` (new) — Task interface\n- `api/src/db/tasks.ts` (new) — Prepared statements and functions\n\n**Task interface:**\n```ts\ninterface Task {\n  id: number;\n  project_id: number;\n  title: string;\n  note: string | null;\n  completed: boolean; // converted from INTEGER at boundary\n  sort_order: number | null;\n  created_at: string;\n  updated_at: string;\n}\n```\n\n**Functions:**\n- `createTask(projectId: number, title: string, note?: string): Task`\n- `listTasksByProject(projectId: number): Task[]`\n- `getTask(id: number): Task | undefined`\n- `updateTask(id: number, data: { title?: string; note?: string; completed?: boolean }): Task | undefined`\n- `deleteTask(id: number): boolean`\n- `countTasksByProject(projectId: number): number`\n\n**Approach:** Use prepared statements with named params. Convert `completed` INTEGER 0/1 to/from boolean at the boundary (read: `!!row.completed`, write: `completed ? 1 : 0`). Update `updated_at` on every updateTask call.\n\n**Tests to run:** `npm run build -w api` compiles cleanly.\n\n**Acceptance:** All 6 functions exist, return typed results, boolean conversion works correctly, build passes.",
-    "updatedAt": "2026-08-28T03:49:27.525Z"
+    "taskId": 18,
+    "content": "## Task: Add tasks REST routes\n\nAdd api/src/routes/tasks.ts with endpoints for task CRUD within projects.\n\n**What/Why:** REQ-032-036 require REST endpoints for tasks. Routes wire data-access to HTTP.\n\n**Files:**\n- `api/src/routes/tasks.ts` (new) — Express router with task endpoints\n- `api/src/server.ts` — Import and mount tasks router\n\n**Endpoints:**\n- `POST /api/projects/:projectId/tasks` — Create task (400 if title missing, 404 if project not found)\n- `GET /api/projects/:projectId/tasks` — List tasks for project (404 if project not found)\n- `GET /api/tasks/:id` — Get single task (404 if not found)\n- `PUT /api/tasks/:id` — Update task title/note/completed (404 if not found)\n- `DELETE /api/tasks/:id` — Delete task (204 on success, 404 if not found)\n\n**Approach:** Create Router, use data-access functions from db/tasks.ts, check project exists before create/list. Match 400/404 error JSON format from projects routes. Mount at `/api` base in server.ts (routes use full paths like `/projects/:projectId/tasks`).\n\n**Tests to run:** `npm run build -w api`, manual curl testing for each endpoint.\n\n**Acceptance:** All 5 endpoints work, 400 for missing title, 404 for unknown project/task, task CRUD persists to DB.",
+    "updatedAt": "2026-08-28T03:51:29.479Z"
   },
   "feedback": {
-    "taskId": 17,
-    "content": "# Feedback\nNone — implementation matches the spec, builds cleanly, and functional behavior verified end-to-end.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T03:51:29.459Z"
+    "taskId": 18,
+    "content": "All acceptance criteria are met: build is clean, existing tests pass unaffected, and all 5 endpoints plus every 400/404 branch were manually verified end-to-end against a real scratch DB with exact response bodies matching the spec. Code follows established routing/validation conventions from `projects.ts`. No issues found.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T03:55:23.465Z"
   },
-  "lastUpdated": "2026-08-28T03:51:29.461Z"
+  "lastUpdated": "2026-08-28T03:55:23.468Z"
 }
