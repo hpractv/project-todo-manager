@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { describe, expect, it, vi } from 'vitest';
 import type { Task } from '../api/types';
+import labelsReducer from './labelsSlice';
 import projectsReducer from './projectsSlice';
 import tasksReducer, {
   createTask,
@@ -43,7 +44,9 @@ function makeTask(overrides: Partial<Task> = {}): Task {
 }
 
 function makeStore() {
-  return configureStore({ reducer: { projects: projectsReducer, tasks: tasksReducer } });
+  return configureStore({
+    reducer: { projects: projectsReducer, tasks: tasksReducer, labels: labelsReducer },
+  });
 }
 
 describe('tasksSlice initial state', () => {

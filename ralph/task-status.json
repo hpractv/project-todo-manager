@@ -238,10 +238,10 @@
       "id": 27,
       "title": "Labels Redux slice",
       "description": "Add `web/src/store/labelsSlice.ts` following `projectsSlice.ts` pattern: state `{ labels: Label[], loading, error }`, async thunks `fetchLabels`, `createLabel`, `updateLabel`, `deleteLabel`. Export selectors `selectLabels`, `selectLabelsLoading`, `selectLabelsError`. Register reducer in `web/src/store/index.ts`. Do NOT add `setTaskLabels` thunk here (it will update the task, not labels state). Files: `web/src/store/labelsSlice.ts` (new), `web/src/store/index.ts`. Tests: `npm run build -w web` clean; add `web/src/store/labelsSlice.test.ts` with at least 5 tests (initial state, fetchLabels fulfilled/rejected, createLabel fulfilled, deleteLabel fulfilled). AC: slice shape matches other slices; selectors typed correctly; tests pass.",
-      "status": "backlog",
-      "devIterations": 0,
+      "status": "done",
+      "devIterations": 1,
       "createdAt": "2026-08-28T03:44:34.095Z",
-      "updatedAt": "2026-08-28T04:29:47.660Z"
+      "updatedAt": "2026-08-28T04:42:44.155Z"
     },
     {
       "id": 28,
@@ -379,18 +379,18 @@
       "updatedAt": "2026-08-28T04:29:47.660Z"
     }
   ],
-  "currentTaskNum": 26,
-  "totalLLMCalls": 24,
+  "currentTaskNum": 27,
+  "totalLLMCalls": 26,
   "maxLLMCalls": 500,
   "nextTask": {
-    "taskId": 26,
-    "content": "## Task: Web Label types + API client methods\n\nAdd `Label` and `LabelInput` types to `web/src/api/types.ts` matching `api/src/types/label.ts`. Extend `Task` type to include optional `labels?: Label[]`. Add client methods to `web/src/api/client.ts`: `fetchLabels()`, `createLabel(data)`, `updateLabel(id, data)`, `deleteLabel(id)`, `setTaskLabels(taskId, labelIds)`. Each method hits the corresponding route from task 25. Files: `web/src/api/types.ts`, `web/src/api/client.ts`. Tests: `npm run build -w web` clean; existing `npm run test -w web` green; optionally verify via Vite SSR loader against a running API. AC: types match API contracts; all 5 label methods callable without TS errors.",
-    "updatedAt": "2026-08-28T04:37:38.646Z"
+    "taskId": 27,
+    "content": "## Task: Labels Redux slice\n\nAdd `web/src/store/labelsSlice.ts` following `projectsSlice.ts` pattern: state `{ labels: Label[], loading, error }`, async thunks `fetchLabels`, `createLabel`, `updateLabel`, `deleteLabel`. Export selectors `selectLabels`, `selectLabelsLoading`, `selectLabelsError`. Register reducer in `web/src/store/index.ts`. Do NOT add `setTaskLabels` thunk here (it will update the task, not labels state). Files: `web/src/store/labelsSlice.ts` (new), `web/src/store/index.ts`. Tests: `npm run build -w web` clean; add `web/src/store/labelsSlice.test.ts` with at least 5 tests (initial state, fetchLabels fulfilled/rejected, createLabel fulfilled, deleteLabel fulfilled). AC: slice shape matches other slices; selectors typed correctly; tests pass.",
+    "updatedAt": "2026-08-28T04:39:52.981Z"
   },
   "feedback": {
-    "taskId": 26,
-    "content": "The TypeScript compile via `npm run build -w web` already validates type-correctness across the whole module graph, which is the authoritative check here — the SSR smoke test is redundant. All verification is complete.\n\n## QA Summary\n\n- `web/src/api/types.ts`: `Label`/`LabelInput` match `api/src/types/label.ts` exactly (`color: string | null`); `Task.labels?: Label[]` added as optional — correct.\n- `web/src/api/client.ts`: all 5 methods present — `fetchLabels()`, `createLabel(data)`, `updateLabel(id, data)`, `deleteLabel(id)`, `setTaskLabels(taskId, labelIds)`. Verified each against the actual registered routes (`api/src/routes/labels.ts`, `api/src/routes/tasks.ts` `PUT /tasks/:id/labels`) — paths, HTTP methods, and body shapes (`{label_ids: [...]}`, snake_case) all correct. `updateLabel` correctly types its param as `Partial<LabelInput>` matching the route's true-partial-update semantics.\n- `npm run build -w web` — clean (tsc + vite build).\n- `npm run test -w web` — 2 files, 10 tests, all green, no regressions.\n- Diff scoped to exactly the two listed files; no stray changes.\n- No new test file added, which matches this task's own \"Tests\" line (build + existing suite, optional SSR smoke) and the established repo convention for types/client-only tasks.\n\nNo issues found.\n\n<status>verified</status>\n",
-    "updatedAt": "2026-08-28T04:39:52.964Z"
+    "taskId": 27,
+    "content": "Memory already has a matching entry from the dev pass, no need to duplicate. This task is verified.\n\n<status>verified</status>\n",
+    "updatedAt": "2026-08-28T04:42:44.153Z"
   },
-  "lastUpdated": "2026-08-28T04:39:52.966Z"
+  "lastUpdated": "2026-08-28T04:42:44.155Z"
 }
