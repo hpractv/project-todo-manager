@@ -5,6 +5,21 @@ front end is a React/Redux (TypeScript, Vite) app talking to an Express REST API
 which persists all state in a local SQLite database via `better-sqlite3`. Everything
 runs on your machine — no accounts, no cloud sync, no external network dependency.
 
+## Ralph Loop Iterations and Time Budget
+
+This repository state represents a **second Ralph loop run** focused on making the
+project more feature complete.
+
+All implementation work reflected here was completed in exactly **2 Ralph loop
+iterations**, with **no extra agentic coaching** applied between or during those
+iterations.
+
+| Epic Iteration | Ralph Loop Time Spent |
+| -------------- | --------------------- |
+| Iteration 1    | 1h 27m                |
+| Iteration 2    | 12h 8m                |
+
+
 ## Prerequisites
 
 - Node.js v20.x (developed and tested against v20.20.2)
@@ -79,17 +94,3 @@ To confirm data persists across a restart:
 5. `npm run dev` again, and reopen http://localhost:5173.
 6. The project you created is still there — it was read from `api/data/todo.db`,
    not held in memory.
-
-## Ralph Loop Iterations and Time Budget
-
-This repository state represents a **second Ralph loop run** focused on making the
-project more feature complete.
-
-All implementation work reflected here was completed in exactly **2 Ralph loop
-iterations**, with **no extra agentic coaching** applied between or during those
-iterations.
-
-| Epic Iteration | Ralph Loop Time Spent |
-| -------------- | --------------------- |
-| Iteration 1    | 1h 27m                |
-| Iteration 2    | 12h 8m                |
